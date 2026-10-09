@@ -1,1 +1,10 @@
-{"name":"@president/game","version":"0.1.0","private":true,"type":"module","exports":"./src/GameEngine.ts","dependencies":{"@president/shared":"*"}}
+{
+  "name": "@president/game",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/GameEngine.ts",
+  "dependencies": {
+    "@president/shared": "*"
+  }
+}
