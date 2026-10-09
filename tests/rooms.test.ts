@@ -7,8 +7,8 @@ import type { RoomView, Session, Reply } from '@president/shared';
 const clients:Socket[]=[];
 const servers:ReturnType<typeof createAppServer>[]=[];
 afterEach(async()=>{clients.forEach(c=>c.disconnect());clients.length=0;await Promise.all(servers.splice(0).map(s=>s.close()));});
-async function setup() {
-  const server=createAppServer();servers.push(server); await new Promise<void>(r=>server.http.listen(0,'127.0.0.1',r));
+async function setup(botDelay?:number) {
+  const server=createAppServer({botDelay});servers.push(server); await new Promise<void>(r=>server.http.listen(0,'127.0.0.1',r));
   const url=`http://127.0.0.1:${(server.http.address() as AddressInfo).port}`;
   async function client() {const s=io(url,{transports:['websocket'],reconnection:false});clients.push(s);await new Promise<void>((r,j)=>{s.on('connect',r);s.on('connect_error',j);});return s;}
   return {server,url,client};
@@ -48,5 +48,15 @@ describe('Contrat salons Socket.IO',()=> {
   });
   it('rejette les pseudos et messages malformés sans arrêter le serveur',async()=> {
     const {client}=await setup(),a=await client();expect((await ack(a,'room:create',null)).ok).toBe(false);expect((await ack(a,'room:create',{name:'',mode:'online'})).ok).toBe(false);expect((await ack(a,'room:create',{name:'OK',mode:'online'})).ok).toBe(true);
+  });
+  it('un joueur déconnecté est joué par un bot puis récupère sa main',async()=> {
+    const {client,server}=await setup(20),a=await client(),b=await client();
+    const sa=(await ack(a,'room:create',{name:'A',mode:'online'})).data!,sb=(await ack(b,'room:join',{code:sa.code,name:'B'})).data!;
+    await ack(a,'room:start');const room=server.rooms.rooms.get(sa.code)!,game=room.game!;
+    game.state.opening=false;game.state.turn=sb.playerId;game.state.table=null;
+    game.player(sb.playerId).hand=[{id:'3-clubs',rank:3,suit:'clubs'},{id:'4-clubs',rank:4,suit:'clubs'}];
+    const played=new Promise<RoomView>(resolve=>{const listener=(v:RoomView)=>{if(v.players.find(p=>p.id===sb.playerId)?.count===1){a.off('room:state',listener);resolve(v);}};a.on('room:state',listener);});
+    b.disconnect();await played;
+    const recovered=await client(),view=state(recovered);expect((await ack(recovered,'session:resume',{token:sb.token})).ok).toBe(true);expect((await view).hand).toHaveLength(1);
   });
 });
