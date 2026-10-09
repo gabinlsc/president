@@ -19,11 +19,16 @@ export class RoomManager {
   }
   create(input:{name:string;mode:'online'|'solo';bots?:number},socketId:string):Session {
     if(!input || (input.mode!=='online' && input.mode!=='solo')) throw new Error('Mode de jeu invalide.');
-    if(input.mode==='solo') throw new Error('Le mode solo sera disponible à la prochaine étape.');
+    if(input.mode==='solo' && (!Number.isInteger(input.bots) || input.bots!<4 || input.bots!>8)) throw new Error('Choisissez entre 4 et 8 adversaires bots.');
     if(this.rooms.size>=1000) throw new Error('Le serveur est complet. Réessayez plus tard.');
     const name=this.name(input.name); let code:string;
     do { code=randomBytes(3).toString('hex').slice(0,4).toUpperCase(); } while(this.rooms.has(code));
     const member=this.member(name,socketId), room:Room={code,mode:input.mode,hostId:member.id,members:[member],game:null,touched:Date.now()};
+    if(input.mode==='solo') {
+      const names=['Camille','Sacha','Lou','Noa','Charlie','Alex','Robin','Jules'];
+      for(let i=0;i<input.bots!;i++) room.members.push({id:randomUUID(),name:names[i]!,bot:true,connected:false,socketId:null,token:null});
+      room.game=new GameEngine(room.members);
+    }
     this.rooms.set(code,room); const session=this.session(room,member); this.changed(room); return session;
   }
   join(input:{code:string;name:string},socketId:string):Session {

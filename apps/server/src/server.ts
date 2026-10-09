@@ -4,8 +4,9 @@ import { resolve, extname } from 'node:path';
 import { Server } from 'socket.io';
 import type { ClientEvents, ServerEvents, Reply } from '@president/shared';
 import { RoomManager } from './RoomManager';
+import { BotScheduler } from './BotScheduler';
 
-export function createAppServer(options:{origin?:string;staticDir?:string}={}) {
+export function createAppServer(options:{origin?:string;staticDir?:string;botDelay?:number}={}) {
   const rooms=new RoomManager();
   const origin=options.origin??process.env.CLIENT_ORIGIN??'http://localhost:5173';
   const http=createHttpServer(async(req,res)=> {
@@ -23,7 +24,8 @@ export function createAppServer(options:{origin?:string;staticDir?:string}={}) {
     res.writeHead(404); res.end('Not found');
   });
   const io=new Server<ClientEvents,ServerEvents>(http,{cors:{origin},maxHttpBufferSize:16_384,allowRequest:(req,cb)=>cb(null,!req.headers.origin || req.headers.origin===origin)});
-  rooms.onChange=room=> { for(const member of room.members) if(member.socketId) io.to(member.socketId).emit('room:state',rooms.view(room,member.id)); };
+  const bots=new BotScheduler(rooms,options.botDelay);
+  rooms.onChange=room=> { for(const member of room.members) if(member.socketId) io.to(member.socketId).emit('room:state',rooms.view(room,member.id)); bots.schedule(room); };
   io.on('connection',socket=> {
     let token:string|null=null, windowStart=Date.now(), requests=0;
     const action=<T>(ack:unknown,operation:()=>T) => {
@@ -53,5 +55,5 @@ export function createAppServer(options:{origin?:string;staticDir?:string}={}) {
     socket.on('disconnect',()=>rooms.disconnect(token,socket.id));
   });
   const cleanup=setInterval(()=>rooms.cleanup(),60_000); cleanup.unref();
-  return {http,io,rooms,close:()=>new Promise<void>(done=>{clearInterval(cleanup);io.close(()=>done());})};
+  return {http,io,rooms,close:()=>new Promise<void>(done=>{clearInterval(cleanup);bots.close();io.close(()=>done());})};
 }
