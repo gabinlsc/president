@@ -1,0 +1,1 @@
+{"name":"@president/server","private":true,"type":"module","scripts":{"dev":"tsx watch src/index.ts","build":"tsup src/index.ts --format esm --out-dir dist --clean","start":"node dist/index.js"},"dependencies":{"@president/shared":"*","socket.io":"^4.8.0"},"devDependencies":{"tsx":"^4.20.0","tsup":"^8.5.0"}}
