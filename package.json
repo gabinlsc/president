@@ -1,1 +1,33 @@
-{"name":"le-president","private":true,"type":"module","workspaces":["apps/*","packages/*"],"engines":{"node":">=22.12"},"scripts":{"dev":"concurrently -k -n server,web \"npm run dev -w @president/server\" \"npm run dev -w @president/web\"","build":"npm run build -w @president/server && npm run build -w @president/web","start":"npm run start -w @president/server","typecheck":"tsc --noEmit && vue-tsc --noEmit -p apps/web/tsconfig.json","test":"vitest run --passWithNoTests","test:watch":"vitest","check":"npm run typecheck && npm test && npm run build"},"devDependencies":{"@types/node":"^24.0.0","concurrently":"^9.2.0","typescript":"^5.9.0","vitest":"^5.0.3"}}
+{
+  "name": "le-president",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n server,web \"npm run dev -w @president/server\" \"npm run dev -w @president/web\"",
+    "build": "npm run build -w @president/server && npm run build -w @president/web",
+    "start": "npm run start -w @president/server",
+    "typecheck": "tsc --noEmit && vue-tsc --noEmit -p apps/web/tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm test && npm run build",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^24.0.0",
+    "concurrently": "^9.2.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.2"
+  }
+}
