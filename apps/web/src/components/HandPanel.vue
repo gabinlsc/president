@@ -40,6 +40,19 @@ const hint = computed(() => {
   return `Jouez ${what} de valeur ${rankLabel(g.trick.rank)} ou plus, ou passez.`;
 });
 
+/** Fan geometry: a gentle arc whose spread tightens as the hand grows. */
+const fan = computed(() => {
+  const n = game.value.hand.length;
+  const step = Math.min(4, 46 / Math.max(n, 1));
+  const mid = (n - 1) / 2;
+  return (i: number) => {
+    const d = i - mid;
+    return {
+      transform: `rotate(${d * step}deg) translateY(${Math.abs(d) * Math.abs(d) * 0.35}px)`,
+    };
+  };
+});
+
 const turnLabel = computed(() => {
   const g = game.value;
   if (g.phase === 'exchanging') return 'Échanges';
@@ -51,14 +64,20 @@ const turnLabel = computed(() => {
 
 <template>
   <section
-    class="glass-strong rounded-[2rem] p-4 transition sm:p-5"
+    class="glass-strong relative rounded-[2rem] p-4 transition sm:p-6"
     :class="store.isMyTurn ? 'hand-active' : ''"
     aria-label="Votre main"
   >
     <header class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <span class="grid size-10 place-items-center rounded-full bg-moss font-semibold text-white">
-          {{ store.self?.name.slice(0, 1).toUpperCase() }}
+        <span class="relative grid size-11 place-items-center">
+          <span v-if="store.isMyTurn" class="turn-ring" aria-hidden="true" />
+          <span
+            class="grid size-11 place-items-center rounded-full font-display text-lg"
+            :class="store.isMyTurn ? 'bg-gold text-[#1d1608]' : 'bg-moss text-on-accent'"
+          >
+            {{ store.self?.name.slice(0, 1).toUpperCase() }}
+          </span>
         </span>
         <span>
           <strong data-testid="self-name">{{ store.self?.name }}</strong>
@@ -69,12 +88,8 @@ const turnLabel = computed(() => {
         </span>
       </div>
       <span
-        class="rounded-full px-3 py-1.5 text-xs font-semibold transition"
-        :class="
-          store.isMyTurn
-            ? 'bg-moss text-white shadow-[0_6px_16px_-6px_rgb(47_93_80/0.8)]'
-            : 'bg-white/70 text-ink-soft'
-        "
+        class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
+        :class="store.isMyTurn ? 'bg-gold text-[#1d1608] shadow-lg' : 'bg-surface/60 text-ink-soft'"
         data-testid="turn"
         :data-mine="store.isMyTurn"
         >{{ turnLabel }}</span
@@ -84,29 +99,38 @@ const turnLabel = computed(() => {
     <Transition name="fade">
       <p
         v-if="store.isMyTurn"
-        class="mt-3 rounded-2xl bg-moss px-4 py-2 text-center text-sm font-semibold text-white shadow"
+        class="mx-auto mt-3 w-fit rounded-full bg-gradient-to-b from-champagne to-gold px-6 py-1.5 text-center font-display text-base text-[#1d1608] shadow-lg"
         role="status"
       >
-        À vous de jouer !
+        À vous de jouer
       </p>
     </Transition>
-    <div class="-mx-4 mt-3 overflow-x-auto px-4 pt-5 pb-2 sm:-mx-5 sm:px-5">
+
+    <div class="-mx-4 mt-2 overflow-x-auto px-4 pt-8 pb-3 sm:-mx-6 sm:px-6">
       <div
         :key="`round-${game.round}`"
-        class="flex min-w-max justify-center -space-x-5 sm:-space-x-4"
+        class="flex min-w-max items-end justify-center -space-x-9 sm:-space-x-7"
         data-testid="hand"
       >
-        <PlayingCard
+        <span
           v-for="(card, i) in game.hand"
           :key="card.id"
-          :card="card"
-          :style="{ '--i': i }"
-          interactive
-          :selected="store.selected.includes(card.id)"
-          :playable="game.phase !== 'playing' || playable.has(card.id)"
-          :class="['deal-in', reserved.has(card.id) ? 'ring-2 ring-gold/70' : '']"
-          @select="store.toggle(card.id)"
-        />
+          class="relative origin-bottom transition-transform duration-300 hover:z-20"
+          :style="fan(i)"
+        >
+          <PlayingCard
+            :card="card"
+            :style="{ '--i': i }"
+            interactive
+            :selected="store.selected.includes(card.id)"
+            :playable="game.phase !== 'playing' || playable.has(card.id)"
+            :class="[
+              'deal-in',
+              reserved.has(card.id) ? 'ring-2 ring-gold ring-offset-2 ring-offset-transparent' : '',
+            ]"
+            @select="store.toggle(card.id)"
+          />
+        </span>
       </div>
     </div>
 
@@ -116,7 +140,7 @@ const turnLabel = computed(() => {
         <button
           v-if="store.selected.length"
           type="button"
-          class="ml-2 text-xs font-semibold text-moss underline-offset-2 hover:underline"
+          class="ml-2 text-xs font-semibold text-gold underline-offset-2 hover:underline"
           @click="store.selected = []"
         >
           Effacer
@@ -126,11 +150,10 @@ const turnLabel = computed(() => {
         <button
           v-if="game.phase === 'playing' && store.self?.status !== 'finished'"
           type="button"
-          class="btn min-h-11 border px-4"
           :class="
             store.availableCut
-              ? 'cut-ready border-gold bg-gold text-white'
-              : 'border-ink/10 bg-ink/5 text-ink-soft'
+              ? 'btn-gold cut-ready'
+              : 'btn border border-ink/10 bg-ink/5 text-ink-soft'
           "
           title="S’active dès que vous pouvez fermer un carré, à votre tour ou hors tour."
           :disabled="!store.availableCut || store.pending || !store.connected"

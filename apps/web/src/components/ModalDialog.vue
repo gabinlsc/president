@@ -41,7 +41,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="fixed inset-0 z-50 grid place-items-center bg-ink/20 p-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4 backdrop-blur-md"
     @click.self="emit('close')"
   >
     <section
@@ -53,7 +53,7 @@ onBeforeUnmount(() => {
     >
       <button
         type="button"
-        class="absolute top-4 right-4 grid size-9 place-items-center rounded-full text-ink-soft transition hover:bg-white"
+        class="absolute top-4 right-4 grid size-9 place-items-center rounded-full text-ink-soft transition hover:bg-surface"
         aria-label="Fermer"
         @click="emit('close')"
       >

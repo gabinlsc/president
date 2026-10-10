@@ -113,6 +113,8 @@ test('deux navigateurs rejoignent une table, jouent et récupèrent après recha
 });
 
 test('solo complet, classement, échanges puis manche suivante', async ({ page }) => {
+  // A whole round with card animations between every click.
+  test.setTimeout(240_000);
   await ready(page);
   await page.getByRole('button', { name: 'Un bot de plus' }).click();
   await page.getByRole('button', { name: 'Jouer en solo', exact: true }).click();

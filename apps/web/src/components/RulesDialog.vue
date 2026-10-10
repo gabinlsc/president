@@ -37,7 +37,7 @@ const rules: readonly [string, string][] = [
 <template>
   <ModalDialog title="Les règles du Président" @close="$emit('close')">
     <dl class="space-y-3 text-sm leading-relaxed">
-      <div v-for="[term, text] in rules" :key="term" class="rounded-2xl bg-white/60 p-3">
+      <div v-for="[term, text] in rules" :key="term" class="rounded-2xl bg-surface/60 p-3">
         <dt class="font-semibold text-moss">{{ term }}</dt>
         <dd class="text-ink-soft">{{ text }}</dd>
       </div>

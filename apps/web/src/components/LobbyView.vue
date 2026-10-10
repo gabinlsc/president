@@ -30,7 +30,7 @@ async function copy(): Promise<void> {
     <p class="mt-2 text-ink-soft">Partagez ce code et retrouvez-vous à la même table.</p>
     <button
       type="button"
-      class="mx-auto mt-5 flex items-center gap-3 rounded-2xl bg-white/80 px-6 py-3 font-mono text-3xl tracking-[0.35em] shadow-(--shadow-card) transition hover:bg-white"
+      class="mx-auto mt-5 flex items-center gap-3 rounded-2xl bg-surface/80 px-6 py-3 font-mono text-3xl tracking-[0.35em] shadow-(--shadow-card) transition hover:bg-surface"
       :aria-label="`Copier le code ${snapshot.code}`"
       data-testid="room-code"
       @click="copy"
@@ -42,10 +42,10 @@ async function copy(): Promise<void> {
       <li
         v-for="member in snapshot.members"
         :key="member.id"
-        class="flex items-center gap-3 rounded-2xl bg-white/70 p-3 text-left"
+        class="flex items-center gap-3 rounded-2xl bg-surface/70 p-3 text-left"
         data-testid="lobby-member"
       >
-        <span class="grid size-10 place-items-center rounded-full bg-moss text-white">{{
+        <span class="grid size-10 place-items-center rounded-full bg-moss text-on-accent">{{
           member.name.slice(0, 1).toUpperCase()
         }}</span>
         <span class="flex-1">
@@ -65,7 +65,7 @@ async function copy(): Promise<void> {
         :key="`free-${i}`"
         class="flex items-center gap-3 rounded-2xl border border-dashed border-ink/15 p-3 text-left text-ink-soft"
       >
-        <span class="grid size-10 place-items-center rounded-full bg-white/60"
+        <span class="grid size-10 place-items-center rounded-full bg-surface/60"
           ><Plus :size="18"
         /></span>
         Place libre
@@ -76,7 +76,7 @@ async function copy(): Promise<void> {
       <button
         v-if="store.isHost"
         type="button"
-        class="btn-primary"
+        class="btn-gold"
         :disabled="snapshot.members.length < MIN_PLAYERS || store.pending || !store.connected"
         @click="store.start()"
       >
