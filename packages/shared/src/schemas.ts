@@ -56,9 +56,12 @@ export const cardsSchema = z.object({
     .refine((ids) => new Set(ids).size === ids.length, 'Sélection de cartes invalide.'),
 }) satisfies z.ZodType<CardsInput>;
 
-/** Parses untrusted socket input; throws an Error carrying the first user-facing message. */
+/** Malformed client input; its message is safe to show to the player. */
+export class InputError extends Error {}
+
+/** Parses untrusted socket input; throws an InputError carrying the first user-facing message. */
 export function parseInput<T>(schema: z.ZodType<T>, input: unknown): T {
   const result = schema.safeParse(input);
-  if (!result.success) throw new Error(result.error.issues[0]?.message ?? 'Demande invalide.');
+  if (!result.success) throw new InputError(result.error.issues[0]?.message ?? 'Demande invalide.');
   return result.data;
 }
