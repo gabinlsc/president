@@ -87,6 +87,8 @@ export interface RoundOverState extends GameStateBase {
   readonly phase: 'roundOver';
   /** Final standings, best first. Roles already reflect it. */
   readonly ranking: readonly PlayerId[];
+  /** Players who ended on a 2 this round. */
+  readonly penalized: readonly PlayerId[];
 }
 
 export type GameState = LobbyState | DealingState | ExchangingState | PlayingState | RoundOverState;

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": "./src/GameEngine.ts",
+  "exports": "./src/index.ts",
   "dependencies": {
     "@president/shared": "*"
   }
