@@ -38,10 +38,13 @@ describe('Arrêt sur victoire', () => {
   });
 
   it('si tous passent derrière un joueur sorti, le joueur actif suivant relance', () => {
-    const start = playing([[], [card(4)], [card(5), card(9)], [card(6), card(10)], [card(7), card(11)]], {
-      finished: ['p0'],
-      turn: 'p1',
-    });
+    const start = playing(
+      [[], [card(4)], [card(5), card(9)], [card(6), card(10)], [card(7), card(11)]],
+      {
+        finished: ['p0'],
+        turn: 'p1',
+      },
+    );
     const { state, events } = run(start, [play('p1', card(4)), pass('p2'), pass('p3'), pass('p4')]);
     const game = asPlaying(state);
     expect(game.trick).toBeNull();
@@ -56,17 +59,22 @@ describe('Arrêt sur victoire', () => {
       finished: ['p1', 'p3'],
     });
     expect(asPlaying(apply(start, play('p0', card(3))).state).turn).toBe('p2');
-    const reversed = playing([[card(3), card(7)], [], [card(5), card(9)], [], [card(6), card(10)]], {
-      finished: ['p1', 'p3'],
-      isReversed: true,
-    });
+    const reversed = playing(
+      [[card(3), card(7)], [], [card(5), card(9)], [], [card(6), card(10)]],
+      {
+        finished: ['p1', 'p3'],
+        isReversed: true,
+      },
+    );
     expect(asPlaying(apply(reversed, play('p0', card(3))).state).turn).toBe('p4');
   });
 
   it('une sortie sur la Dame de pique fait relancer le voisin dans le nouveau sens', () => {
     const game = asPlaying(
-      apply(playing([[card(12, 'spades')], [card(13), card(3)], [card(14), card(4)]]), play('p0', card(12, 'spades')))
-        .state,
+      apply(
+        playing([[card(12, 'spades')], [card(13), card(3)], [card(14), card(4)]]),
+        play('p0', card(12, 'spades')),
+      ).state,
     );
     expect(game.isReversed).toBe(true);
     expect(game.turn).toBe('p2');
@@ -75,14 +83,20 @@ describe('Arrêt sur victoire', () => {
 
   it('une coupe pour sortir nettoie la table et ne laisse pas rejouer le joueur sorti', () => {
     const { state, events } = run(
-      playing([[card(6), card(9)], [card(10), card(11)], [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')]]),
+      playing([
+        [card(6), card(9)],
+        [card(10), card(11)],
+        [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')],
+      ]),
       [play('p0', card(6)), play('p2', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'))],
     );
     const game = asPlaying(state);
     expect(game.finished).toEqual(['p2']);
     expect(game.trick).toBeNull();
     expect(game.turn).toBe('p0');
-    expect(events).toContainEqual(expect.objectContaining({ type: 'trickCleared', reason: 'square', leaderId: 'p0' }));
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: 'trickCleared', reason: 'square', leaderId: 'p0' }),
+    );
   });
 });
 
@@ -107,7 +121,9 @@ describe('Punition du 2', () => {
     expect(game.finished).toEqual(['p1']);
     expect(game.trick).toBeNull();
     expect(game.turn).toBe('p2');
-    expect(events).toContainEqual(expect.objectContaining({ type: 'trickCleared', reason: 'presidentOut' }));
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: 'trickCleared', reason: 'presidentOut' }),
+    );
   });
 
   it('plusieurs punis sont classés derrière tous les autres, le dernier puni en dernier', () => {
@@ -129,14 +145,19 @@ describe('Punition du 2', () => {
 
 describe('Fin de manche et rôles', () => {
   it('à 2 joueurs : Président et Trou du cul', () => {
-    const over = asRoundOver(apply(playing([[card(3)], [card(4), card(5)]]), play('p0', card(3))).state);
+    const over = asRoundOver(
+      apply(playing([[card(3)], [card(4), card(5)]]), play('p0', card(3))).state,
+    );
     expect(over.ranking).toEqual(['p0', 'p1']);
     expect(roles(over)).toEqual({ p0: 'president', p1: 'trouduc' });
   });
 
   it('à 3 joueurs : pas de vice-rôles', () => {
     const over = asRoundOver(
-      run(playing([[card(3)], [card(4)], [card(5), card(6)]]), [play('p0', card(3)), play('p1', card(4))]).state,
+      run(playing([[card(3)], [card(4)], [card(5), card(6)]]), [
+        play('p0', card(3)),
+        play('p1', card(4)),
+      ]).state,
     );
     expect(over.ranking).toEqual(['p0', 'p1', 'p2']);
     expect(roles(over)).toEqual({ p0: 'president', p1: 'neutral', p2: 'trouduc' });

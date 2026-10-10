@@ -3,8 +3,7 @@ import type { RoomMode, RoomSnapshot } from './view';
 import type { PlayerId } from './game';
 
 export type Reply<T = null> =
-  | { readonly ok: true; readonly data: T }
-  | { readonly ok: false; readonly error: string };
+  { readonly ok: true; readonly data: T } | { readonly ok: false; readonly error: string };
 export type Ack<T = null> = (reply: Reply<T>) => void;
 
 export interface Session {

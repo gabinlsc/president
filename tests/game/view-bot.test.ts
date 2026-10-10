@@ -17,7 +17,11 @@ describe('Vue par joueur', () => {
 
   it('propose la coupe hors tour et l’ouverture imposée', () => {
     const state = apply(
-      playing([[card(6), card(9)], [card(10)], [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades')]]),
+      playing([
+        [card(6), card(9)],
+        [card(10)],
+        [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades')],
+      ]),
       play('p0', card(6)),
     ).state;
     expect(legalPlays(state, 'p2')).toEqual([['6-hearts', '6-diamonds', '6-spades']]);
@@ -87,12 +91,17 @@ describe('Bots', () => {
           while (state.phase !== 'roundOver') {
             expect(steps++).toBeLessThan(2000);
             // Out-of-turn squares are offered to every bot before the player to move acts.
-            const cutter = state.phase === 'playing'
-              ? state.seats.find((s) => {
-                  const action = chooseBotAction(state, s.id);
-                  return s.id !== state.turn && action?.type === 'play' && random() < 0.5;
-                })
-              : undefined;
+            const current = state;
+            const turn = current.phase === 'playing' ? current.turn : null;
+            const cutter =
+              turn === null
+                ? undefined
+                : current.seats.find(
+                    (s) =>
+                      s.id !== turn &&
+                      chooseBotAction(current, s.id)?.type === 'play' &&
+                      random() < 0.5,
+                  );
             const actor = cutter?.id ?? nextActor(state);
             expect(actor).not.toBeNull();
             const action: GameAction | null = chooseBotAction(state, actor!);
@@ -118,7 +127,11 @@ describe('Bots', () => {
 
   it('coupe hors tour quand il le peut', () => {
     const state = apply(
-      playing([[card(6), card(9)], [card(10)], [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(3)]]),
+      playing([
+        [card(6), card(9)],
+        [card(10)],
+        [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(3)],
+      ]),
       play('p0', card(6)),
     ).state;
     expect(chooseBotAction(state, 'p2')?.type).toBe('play');

@@ -11,7 +11,11 @@ import type {
   Suit,
 } from '@president/shared';
 
-export const card = (rank: Rank, suit: Suit = 'clubs'): Card => ({ id: `${rank}-${suit}`, rank, suit });
+export const card = (rank: Rank, suit: Suit = 'clubs'): Card => ({
+  id: `${rank}-${suit}`,
+  rank,
+  suit,
+});
 
 /** Four suits in a stable order, so tests can ask for "a second 6" without colliding ids. */
 export const SUIT_ORDER: readonly Suit[] = ['clubs', 'diamonds', 'hearts', 'spades'];
@@ -50,7 +54,8 @@ export interface Applied<S extends GameState = GameState> {
 export function apply(state: GameState, action: GameAction): Applied {
   const frozen = deepFreeze(state);
   const result = transition(frozen, action);
-  if (!result.ok) throw new Error(`${action.type} rejected: ${result.error.code} ${result.error.message}`);
+  if (!result.ok)
+    throw new Error(`${action.type} rejected: ${result.error.code} ${result.error.message}`);
   return { state: result.state, events: result.events };
 }
 

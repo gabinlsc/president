@@ -51,31 +51,53 @@ describe('Échanges post-manche', () => {
   it('seuls le Président et le Vice-président choisissent, avec le bon nombre de cartes', () => {
     const state = toExchange(roundOver(fourRoles));
     const p0 = handOf(state, 'p0');
-    reject(state, { type: 'exchange', playerId: 'p3', cards: handOf(state, 'p3').slice(0, 2) }, 'NO_EXCHANGE_EXPECTED');
+    reject(
+      state,
+      { type: 'exchange', playerId: 'p3', cards: handOf(state, 'p3').slice(0, 2) },
+      'NO_EXCHANGE_EXPECTED',
+    );
     reject(state, { type: 'exchange', playerId: 'p0', cards: p0.slice(0, 1) }, 'WRONG_CARD_COUNT');
-    reject(state, { type: 'exchange', playerId: 'p0', cards: [handOf(state, 'p1')[0]!, p0[0]!] }, 'CARDS_NOT_IN_HAND');
+    reject(
+      state,
+      { type: 'exchange', playerId: 'p0', cards: [handOf(state, 'p1')[0]!, p0[0]!] },
+      'CARDS_NOT_IN_HAND',
+    );
     const once = apply(state, { type: 'exchange', playerId: 'p0', cards: p0.slice(0, 2) }).state;
     expect(once.phase).toBe('exchanging');
-    reject(once, { type: 'exchange', playerId: 'p0', cards: p0.slice(2, 4) }, 'EXCHANGE_ALREADY_SUBMITTED');
+    reject(
+      once,
+      { type: 'exchange', playerId: 'p0', cards: p0.slice(2, 4) },
+      'EXCHANGE_ALREADY_SUBMITTED',
+    );
   });
 
   it('les transferts sont simultanés, conservent 52 cartes et le Trou du cul ouvre', () => {
     const state = toExchange(roundOver(fourRoles));
-    const forced = Object.fromEntries(state.transfers.filter((t) => t.forced).map((t) => [t.fromId, t.cards!]));
+    const forced = Object.fromEntries(
+      state.transfers.filter((t) => t.forced).map((t) => [t.fromId, t.cards!]),
+    );
     const before = Object.fromEntries(state.seats.map((s) => [s.id, s.hand.length]));
     const presidentGift = handOf(state, 'p0').slice(0, 2);
     const viceGift = handOf(state, 'p1').slice(0, 1);
-    const afterPresident = apply(state, { type: 'exchange', playerId: 'p0', cards: presidentGift }).state;
-    const { state: done, events } = apply(afterPresident, { type: 'exchange', playerId: 'p1', cards: viceGift });
+    const afterPresident = apply(state, {
+      type: 'exchange',
+      playerId: 'p0',
+      cards: presidentGift,
+    }).state;
+    const { state: done, events } = apply(afterPresident, {
+      type: 'exchange',
+      playerId: 'p1',
+      cards: viceGift,
+    });
     const game = asPlaying(done);
     expect(events).toContainEqual({ type: 'exchanged' });
     expect(game.turn).toBe('p3');
     expect(game.mustOpenWith).toBeNull();
     expect(game.trick).toBeNull();
-    expect(handOf(game, 'p0')).toEqual(expect.arrayContaining(forced.p3!));
+    expect(handOf(game, 'p0')).toEqual(expect.arrayContaining([...forced.p3!]));
     expect(handOf(game, 'p0')).not.toEqual(expect.arrayContaining([presidentGift[0]]));
     expect(handOf(game, 'p3')).toEqual(expect.arrayContaining(presidentGift));
-    expect(handOf(game, 'p1')).toEqual(expect.arrayContaining(forced.p2!));
+    expect(handOf(game, 'p1')).toEqual(expect.arrayContaining([...forced.p2!]));
     expect(handOf(game, 'p2')).toEqual(expect.arrayContaining(viceGift));
     expect(Object.fromEntries(game.seats.map((s) => [s.id, s.hand.length]))).toEqual(before);
     expect(new Set(allCardIds(game)).size).toBe(DECK_SIZE);
@@ -91,7 +113,8 @@ describe('Échanges post-manche', () => {
     );
     expect(state.transfers).toHaveLength(2);
     const game = asPlaying(
-      apply(state, { type: 'exchange', playerId: 'p0', cards: handOf(state, 'p0').slice(0, 2) }).state,
+      apply(state, { type: 'exchange', playerId: 'p0', cards: handOf(state, 'p0').slice(0, 2) })
+        .state,
     );
     expect(game.turn).toBe('p1');
   });
@@ -99,6 +122,10 @@ describe('Échanges post-manche', () => {
   it('à 3 joueurs, le Citoyen n’échange rien', () => {
     const state = toExchange(roundOver(['president', 'neutral', 'trouduc']));
     expect(state.transfers).toHaveLength(2);
-    reject(state, { type: 'exchange', playerId: 'p1', cards: handOf(state, 'p1').slice(0, 1) }, 'NO_EXCHANGE_EXPECTED');
+    reject(
+      state,
+      { type: 'exchange', playerId: 'p1', cards: handOf(state, 'p1').slice(0, 1) },
+      'NO_EXCHANGE_EXPECTED',
+    );
   });
 });

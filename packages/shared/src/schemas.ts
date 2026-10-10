@@ -1,12 +1,7 @@
 import { z } from 'zod';
 import { MAX_PLAYERS } from './types/game';
 import type { CardId } from './types/cards';
-import type {
-  CardsInput,
-  CreateRoomInput,
-  JoinRoomInput,
-  ResumeInput,
-} from './types/protocol';
+import type { CardsInput, CreateRoomInput, JoinRoomInput, ResumeInput } from './types/protocol';
 
 export const MIN_SOLO_BOTS = 4;
 export const MAX_SOLO_BOTS = MAX_PLAYERS - 1;
@@ -33,7 +28,10 @@ export const createRoomSchema = z.discriminatedUnion('mode', [
       .number({ error: `Choisissez entre ${MIN_SOLO_BOTS} et ${MAX_SOLO_BOTS} adversaires bots.` })
       .int(`Choisissez entre ${MIN_SOLO_BOTS} et ${MAX_SOLO_BOTS} adversaires bots.`)
       .min(MIN_SOLO_BOTS, `Choisissez entre ${MIN_SOLO_BOTS} et ${MAX_SOLO_BOTS} adversaires bots.`)
-      .max(MAX_SOLO_BOTS, `Choisissez entre ${MIN_SOLO_BOTS} et ${MAX_SOLO_BOTS} adversaires bots.`),
+      .max(
+        MAX_SOLO_BOTS,
+        `Choisissez entre ${MIN_SOLO_BOTS} et ${MAX_SOLO_BOTS} adversaires bots.`,
+      ),
   }),
 ]) satisfies z.ZodType<CreateRoomInput>;
 

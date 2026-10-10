@@ -48,7 +48,11 @@ describe('Machine à états', () => {
     reject(lobby, { type: 'completeDeal' }, 'WRONG_PHASE');
     reject(lobby, { type: 'nextRound', seed: 1 }, 'WRONG_PHASE');
     reject(playing([[card(3)], [card(4)]]), { type: 'start', seed: 1 }, 'WRONG_PHASE');
-    reject(playing([[card(3)], [card(4)]]), { type: 'seat', playerId: 'x', name: 'X' }, 'WRONG_PHASE');
+    reject(
+      playing([[card(3)], [card(4)]]),
+      { type: 'seat', playerId: 'x', name: 'X' },
+      'WRONG_PHASE',
+    );
   });
 
   it('gère les sièges du lobby : doublons, table pleine, départ', () => {
@@ -56,10 +60,9 @@ describe('Machine à états', () => {
     reject(lobby, { type: 'seat', playerId: 'p9', name: 'Neuf' }, 'TABLE_FULL');
     reject(seated(2), { type: 'seat', playerId: 'p1', name: 'Bis' }, 'DUPLICATE_PLAYER');
     reject(seated(2), { type: 'unseat', playerId: 'ghost' }, 'UNKNOWN_PLAYER');
-    expect(apply(seated(3), { type: 'unseat', playerId: 'p1' }).state.seats.map((s) => s.id)).toEqual([
-      'p0',
-      'p2',
-    ]);
+    expect(
+      apply(seated(3), { type: 'unseat', playerId: 'p1' }).state.seats.map((s) => s.id),
+    ).toEqual(['p0', 'p2']);
   });
 
   it('refuse de lancer une table de moins de 2 joueurs', () => {
@@ -93,9 +96,12 @@ describe('Machine à états', () => {
   });
 
   it('l’ouverture doit contenir la Dame de cœur et ne peut pas être passée', () => {
-    const state = playing([[card(12, 'hearts'), card(12, 'clubs'), card(3)], [card(4)], [card(5)]], {
-      mustOpenWith: QUEEN_OF_HEARTS,
-    });
+    const state = playing(
+      [[card(12, 'hearts'), card(12, 'clubs'), card(3)], [card(4)], [card(5)]],
+      {
+        mustOpenWith: QUEEN_OF_HEARTS,
+      },
+    );
     reject(state, play('p0', card(3)), 'MUST_OPEN_WITH');
     reject(state, pass('p0'), 'CANNOT_PASS_ON_LEAD');
     const opened = asPlaying(apply(state, play('p0', card(12, 'hearts'), card(12, 'clubs'))).state);

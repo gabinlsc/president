@@ -20,7 +20,11 @@ describe('Contrainte de format', () => {
     const state = playing([[card(3), card(4)], [card(5)]]);
     reject(state, play('p0', card(3), card(4)), 'MIXED_RANKS');
     reject(state, play('p0', card(5)), 'CARDS_NOT_IN_HAND');
-    reject(state, { type: 'play', playerId: 'p0', cards: ['3-clubs', '3-clubs'] }, 'INVALID_SELECTION');
+    reject(
+      state,
+      { type: 'play', playerId: 'p0', cards: ['3-clubs', '3-clubs'] },
+      'INVALID_SELECTION',
+    );
     reject(state, { type: 'play', playerId: 'p0', cards: [] }, 'INVALID_SELECTION');
     reject(state, { type: 'play', playerId: 'ghost', cards: ['3-clubs'] }, 'UNKNOWN_PLAYER');
   });
@@ -66,7 +70,11 @@ describe('Le 2', () => {
 
   it('respecte la contrainte « même carte »', () => {
     const state = run(
-      playing([[card(6), card(3)], [card(6, 'hearts'), card(4)], [card(15), card(5)]]),
+      playing([
+        [card(6), card(3)],
+        [card(6, 'hearts'), card(4)],
+        [card(15), card(5)],
+      ]),
       [play('p0', card(6)), play('p1', card(6, 'hearts'))],
     ).state;
     reject(state, play('p2', card(15)), 'SAME_RANK_REQUIRED');
@@ -100,7 +108,10 @@ describe('Dame de Pique (Reverse)', () => {
     expect(game.turn).toBe('p2');
     const restored = asPlaying(
       apply(
-        playing([[card(3)], [card(12, 'spades'), card(4)], [card(5)]], { isReversed: true, turn: 'p1' }),
+        playing([[card(3)], [card(12, 'spades'), card(4)], [card(5)]], {
+          isReversed: true,
+          turn: 'p1',
+        }),
         play('p1', card(12, 'spades')),
       ).state,
     );
@@ -129,7 +140,10 @@ describe('Contrainte « même carte »', () => {
   ];
 
   it('A (6) → B (6) : C doit jouer un 6 ou passer; s’il joue un 6, D subit la contrainte', () => {
-    const afterB = run(playing(hands()), [play('p0', card(6)), play('p1', card(6, 'hearts'))]).state;
+    const afterB = run(playing(hands()), [
+      play('p0', card(6)),
+      play('p1', card(6, 'hearts')),
+    ]).state;
     expect(asPlaying(afterB).trick?.sameRankRequired).toBe(true);
     reject(afterB, play('p2', card(7)), 'SAME_RANK_REQUIRED');
     const afterC = asPlaying(apply(afterB, play('p2', card(6, 'spades'))).state);
@@ -138,7 +152,10 @@ describe('Contrainte « même carte »', () => {
   });
 
   it('une passe lève la contrainte pour le joueur suivant', () => {
-    const afterB = run(playing(hands()), [play('p0', card(6)), play('p1', card(6, 'hearts'))]).state;
+    const afterB = run(playing(hands()), [
+      play('p0', card(6)),
+      play('p1', card(6, 'hearts')),
+    ]).state;
     const afterPass = asPlaying(apply(afterB, pass('p2')).state);
     expect(afterPass.trick?.sameRankRequired).toBe(false);
     expect(afterPass.turn).toBe('p3');
@@ -167,7 +184,9 @@ describe('Couper (Carré)', () => {
     const game = asPlaying(state);
     expect(game.trick).toBeNull();
     expect(game.turn).toBe('p2');
-    expect(events).toContainEqual(expect.objectContaining({ type: 'played', playerId: 'p2', outOfTurn: true }));
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: 'played', playerId: 'p2', outOfTurn: true }),
+    );
     expect(events).toContainEqual(
       expect.objectContaining({ type: 'trickCleared', reason: 'square', leaderId: 'p2' }),
     );
@@ -182,7 +201,11 @@ describe('Couper (Carré)', () => {
           [card(3), card(4)],
           [card(6, 'spades'), card(6, 'diamonds'), card(7)],
         ]),
-        [play('p0', card(6)), play('p1', card(6, 'hearts')), play('p3', card(6, 'spades'), card(6, 'diamonds'))],
+        [
+          play('p0', card(6)),
+          play('p1', card(6, 'hearts')),
+          play('p3', card(6, 'spades'), card(6, 'diamonds')),
+        ],
       ).state,
     );
     expect(game.trick).toBeNull();
@@ -197,7 +220,10 @@ describe('Couper (Carré)', () => {
           [card(10), card(11)],
           [card(6, 'spades'), card(6, 'diamonds'), card(7)],
         ]),
-        [play('p0', card(6), card(6, 'hearts')), play('p2', card(6, 'spades'), card(6, 'diamonds'))],
+        [
+          play('p0', card(6), card(6, 'hearts')),
+          play('p2', card(6, 'spades'), card(6, 'diamonds')),
+        ],
       ).state,
     );
     expect(game.trick).toBeNull();
@@ -221,11 +247,15 @@ describe('Couper (Carré)', () => {
       playing([
         [card(5), card(5, 'hearts'), card(5, 'diamonds'), card(3)],
         [card(6), card(6, 'hearts'), card(6, 'diamonds'), card(4)],
+        [card(10), card(11)],
         [card(6, 'spades'), card(8)],
       ]),
-      [play('p0', card(5), card(5, 'hearts'), card(5, 'diamonds')), play('p1', card(6), card(6, 'hearts'), card(6, 'diamonds'))],
+      [
+        play('p0', card(5), card(5, 'hearts'), card(5, 'diamonds')),
+        play('p1', card(6), card(6, 'hearts'), card(6, 'diamonds')),
+      ],
     ).state;
-    reject(state, play('p2', card(6, 'spades')), 'NOT_YOUR_TURN');
+    reject(state, play('p3', card(6, 'spades')), 'NOT_YOUR_TURN');
   });
 
   it('un joueur qui a passé peut revenir dans le pli en coupant', () => {
@@ -236,7 +266,11 @@ describe('Couper (Carré)', () => {
           [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'), card(10)],
           [card(7), card(11)],
         ]),
-        [play('p0', card(6)), pass('p1'), play('p1', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'))],
+        [
+          play('p0', card(6)),
+          pass('p1'),
+          play('p1', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')),
+        ],
       ).state,
     );
     expect(game.passed).toEqual([]);
@@ -248,11 +282,16 @@ describe('Couper (Carré)', () => {
       playing([
         [card(6), card(9)],
         [card(7), card(10)],
+        [card(11), card(13)],
         [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'), card(3)],
       ]),
       [play('p0', card(6)), play('p1', card(7))],
     ).state;
-    reject(state, play('p2', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')), 'NOT_YOUR_TURN');
+    reject(
+      state,
+      play('p3', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')),
+      'NOT_YOUR_TURN',
+    );
   });
 
   it('un carré complété à son tour par égalités nettoie aussi la table', () => {
@@ -263,11 +302,18 @@ describe('Couper (Carré)', () => {
         [card(6, 'spades'), card(5)],
         [card(6, 'diamonds'), card(7)],
       ]),
-      [play('p0', card(6)), play('p1', card(6, 'hearts')), play('p2', card(6, 'spades')), play('p3', card(6, 'diamonds'))],
+      [
+        play('p0', card(6)),
+        play('p1', card(6, 'hearts')),
+        play('p2', card(6, 'spades')),
+        play('p3', card(6, 'diamonds')),
+      ],
     );
     expect(asPlaying(state).trick).toBeNull();
     expect(asPlaying(state).turn).toBe('p3');
-    expect(events).toContainEqual(expect.objectContaining({ type: 'trickCleared', reason: 'square' }));
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: 'trickCleared', reason: 'square' }),
+    );
   });
 });
 
@@ -289,11 +335,14 @@ describe('Passes', () => {
 
   it('un joueur ayant passé est sauté jusqu’au nettoyage', () => {
     const game = asPlaying(
-      run(playing([[card(3), card(8)], [card(4), card(9)], [card(5), card(10)]]), [
-        play('p0', card(3)),
-        pass('p1'),
-        play('p2', card(5)),
-      ]).state,
+      run(
+        playing([
+          [card(3), card(8), card(13)],
+          [card(4), card(9)],
+          [card(5), card(10)],
+        ]),
+        [play('p0', card(3)), pass('p1'), play('p2', card(5))],
+      ).state,
     );
     expect(game.turn).toBe('p0');
     const after = asPlaying(apply(game, play('p0', card(8))).state);
@@ -301,7 +350,10 @@ describe('Passes', () => {
   });
 
   it('refuse une passe hors tour', () => {
-    const state = apply(playing([[card(3), card(8)], [card(4)], [card(5)]]), play('p0', card(3))).state;
+    const state = apply(
+      playing([[card(3), card(8)], [card(4)], [card(5)]]),
+      play('p0', card(3)),
+    ).state;
     reject(state, pass('p2'), 'NOT_YOUR_TURN');
   });
 });
