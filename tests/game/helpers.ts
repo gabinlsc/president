@@ -40,7 +40,6 @@ export function playing(hands: Card[][], overrides: Partial<PlayingState> = {}):
     passed: [],
     finished: [],
     penalized: [],
-    mustOpenWith: null,
     ...overrides,
   };
 }

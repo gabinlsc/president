@@ -9,7 +9,18 @@ import {
   transition,
 } from '@president/game';
 import { DECK_SIZE, GAME_PHASES, QUEEN_OF_HEARTS, type GameState } from '@president/shared';
-import { allCardIds, apply, asPlaying, card, pass, play, playing, reject, run } from './helpers';
+import {
+  allCardIds,
+  apply,
+  handOf,
+  asPlaying,
+  card,
+  pass,
+  play,
+  playing,
+  reject,
+  run,
+} from './helpers';
 
 const seated = (count: number): GameState =>
   run(
@@ -86,27 +97,21 @@ describe('Machine à états', () => {
     expect(shuffle(makeDeck(), 7)).not.toEqual(shuffle(makeDeck(), 8));
   });
 
-  it('la Dame de cœur débute la première manche', () => {
+  it('le détenteur de la Dame de cœur débute la première manche, avec la carte de son choix', () => {
     const dealt = apply(seated(4), { type: 'start', seed: 3 }).state;
     const game = asPlaying(apply(dealt, { type: 'completeDeal' }).state);
     const holder = game.seats.find((s) => s.hand.some((c) => c.id === QUEEN_OF_HEARTS))!;
     expect(game.turn).toBe(holder.id);
-    expect(game.mustOpenWith).toBe(QUEEN_OF_HEARTS);
     expect(game.trick).toBeNull();
+    const lowest = holder.hand.find((c) => c.id !== QUEEN_OF_HEARTS)!;
+    const opened = asPlaying(apply(game, play(holder.id, lowest)).state);
+    expect(opened.trick?.rank).toBe(lowest.rank);
+    expect(handOf(opened, holder.id)).toContain(QUEEN_OF_HEARTS);
   });
 
-  it('l’ouverture doit contenir la Dame de cœur et ne peut pas être passée', () => {
-    const state = playing(
-      [[card(12, 'hearts'), card(12, 'clubs'), card(3)], [card(4)], [card(5)]],
-      {
-        mustOpenWith: QUEEN_OF_HEARTS,
-      },
-    );
-    reject(state, play('p0', card(3)), 'MUST_OPEN_WITH');
+  it('l’ouverture ne peut pas être passée', () => {
+    const state = playing([[card(12, 'hearts'), card(3)], [card(4)], [card(5)]]);
     reject(state, pass('p0'), 'CANNOT_PASS_ON_LEAD');
-    const opened = asPlaying(apply(state, play('p0', card(12, 'hearts'), card(12, 'clubs'))).state);
-    expect(opened.mustOpenWith).toBeNull();
-    expect(opened.trick?.format).toBe(2);
   });
 
   it('ne mute jamais l’état reçu, même quand l’action est refusée', () => {

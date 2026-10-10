@@ -11,7 +11,6 @@ export const RULE_MESSAGES: Readonly<Record<RuleViolationCode, string>> = {
   MIXED_RANKS: 'Jouez des cartes de même valeur.',
   NOT_YOUR_TURN: 'Ce n’est pas votre tour.',
   ALREADY_PASSED: 'Vous avez déjà passé sur ce pli.',
-  MUST_OPEN_WITH: 'La première pose doit contenir la Dame de cœur.',
   FORMAT_MISMATCH: 'Respectez le format du pli (simple, paire ou triple).',
   RANK_TOO_LOW: 'Jouez une valeur supérieure ou égale.',
   SAME_RANK_REQUIRED: 'Même carte obligatoire : jouez la même valeur ou passez.',

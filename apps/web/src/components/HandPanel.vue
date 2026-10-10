@@ -32,7 +32,6 @@ const hint = computed(() => {
     return g.legalPlays.length
       ? 'Vous pouvez couper : complétez le carré, même hors tour !'
       : `Au tour de ${store.nameOf(g.turn)}.`;
-  if (g.mustOpenWith) return 'Ouvrez avec la Dame de cœur.';
   if (!g.trick) return 'La table est à vous : ouvrez le pli.';
   if (g.trick.sameRankRequired)
     return `Même carte obligatoire : un ${rankLabel(g.trick.rank)}, ou passez.`;

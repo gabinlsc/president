@@ -41,7 +41,6 @@ export interface GameView {
   readonly seats: readonly PublicSeat[];
   readonly turn: PlayerId | null;
   readonly trick: TrickView | null;
-  readonly mustOpenWith: CardId | null;
   readonly hand: readonly Card[];
   /** Every play the viewer may legally make right now, including out-of-turn squares. */
   readonly legalPlays: readonly (readonly CardId[])[];

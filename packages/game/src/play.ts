@@ -24,9 +24,17 @@ export interface ValidPlay {
   readonly isCut: boolean;
 }
 
-/** A square can be completed on any trick that did not start in triples. */
-export const completesSquare = (trick: Trick | null, cards: readonly Card[]): boolean =>
+/**
+ * A square can be completed on any trick that did not start in triples, but never on top of
+ * one's own play: the last cards of the run must come from someone else.
+ */
+export const completesSquare = (
+  trick: Trick | null,
+  cards: readonly Card[],
+  playerId: PlayerId,
+): boolean =>
   trick !== null &&
+  trick.ownerId !== playerId &&
   trick.format !== 3 &&
   cards.every((c) => c.rank === trick.rank) &&
   trick.run + cards.length === SQUARE;
@@ -53,12 +61,11 @@ export function validatePlay(
     'MIXED_RANKS',
   );
   const { trick } = state;
-  if (completesSquare(trick, cards)) return { cards, isCut: true };
+  if (completesSquare(trick, cards, playerId)) return { cards, isCut: true };
 
   ensure(state.turn === playerId, 'NOT_YOUR_TURN');
   ensure(!state.passed.includes(playerId), 'ALREADY_PASSED');
   ensure(cards.length < SQUARE, 'SQUARE_MUST_CUT');
-  if (state.mustOpenWith) ensure(ids.includes(state.mustOpenWith), 'MUST_OPEN_WITH');
   if (trick) {
     ensure(cards.length === trick.format, 'FORMAT_MISMATCH');
     if (trick.sameRankRequired) ensure(rank === trick.rank, 'SAME_RANK_REQUIRED');
@@ -130,7 +137,6 @@ export function play(
     trick,
     finished,
     penalized,
-    mustOpenWith: null,
   };
   if (seats.filter(isActive).length <= 1) return finishRound(next, events);
 

@@ -277,6 +277,41 @@ describe('Couper (Carré)', () => {
     expect(game.turn).toBe('p1');
   });
 
+  it('on ne coupe pas sur ses propres cartes', () => {
+    const state = apply(
+      playing([
+        [card(6), card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(9)],
+        [card(10), card(11)],
+        [card(12), card(13)],
+      ]),
+      play('p0', card(6)),
+    ).state;
+    reject(
+      state,
+      play('p0', card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades')),
+      'NOT_YOUR_TURN',
+    );
+  });
+
+  it('on peut couper si un autre joueur a posé la dernière carte de la série', () => {
+    const game = asPlaying(
+      run(
+        playing([
+          [card(6), card(6, 'diamonds'), card(6, 'spades'), card(9)],
+          [card(6, 'hearts'), card(11)],
+          [card(12), card(13)],
+        ]),
+        [
+          play('p0', card(6)),
+          play('p1', card(6, 'hearts')),
+          play('p0', card(6, 'diamonds'), card(6, 'spades')),
+        ],
+      ).state,
+    );
+    expect(game.trick).toBeNull();
+    expect(game.turn).toBe('p0');
+  });
+
   it('la série est rompue par une autre valeur : pas de coupe', () => {
     const state = run(
       playing([

@@ -27,7 +27,7 @@ function score(state: PlayingState, playerId: PlayerId, ids: readonly CardId[]):
     cards.length * 8 +
     (groupSize > cards.length ? 12 : 0) +
     (rank === RANK_TWO ? 20 : 0) -
-    (completesSquare(state.trick, cards) ? 18 : 0)
+    (completesSquare(state.trick, cards, playerId) ? 18 : 0)
   );
 }
 

@@ -79,8 +79,6 @@ export interface PlayingState extends GameStateBase {
   readonly finished: readonly PlayerId[];
   /** Players who ended on a 2, in finishing order. */
   readonly penalized: readonly PlayerId[];
-  /** Card the opening play must contain (Queen of hearts on the first round). */
-  readonly mustOpenWith: CardId | null;
 }
 
 export interface RoundOverState extends GameStateBase {
@@ -143,7 +141,6 @@ export const RULE_VIOLATIONS = [
   'MIXED_RANKS',
   'NOT_YOUR_TURN',
   'ALREADY_PASSED',
-  'MUST_OPEN_WITH',
   'FORMAT_MISMATCH',
   'RANK_TOO_LOW',
   'SAME_RANK_REQUIRED',

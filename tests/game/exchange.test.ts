@@ -92,7 +92,6 @@ describe('Échanges post-manche', () => {
     const game = asPlaying(done);
     expect(events).toContainEqual({ type: 'exchanged' });
     expect(game.turn).toBe('p3');
-    expect(game.mustOpenWith).toBeNull();
     expect(game.trick).toBeNull();
     expect(handOf(game, 'p0')).toEqual(expect.arrayContaining([...forced.p3!]));
     expect(handOf(game, 'p0')).not.toEqual(expect.arrayContaining([presidentGift[0]]));

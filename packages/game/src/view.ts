@@ -93,7 +93,6 @@ export function toGameView(state: GameState, viewerId: PlayerId): GameView {
     seats,
     turn: playing?.turn ?? null,
     trick: playing?.trick ?? null,
-    mustOpenWith: playing?.mustOpenWith ?? null,
     hand: state.seats.find((s) => s.id === viewerId)?.hand ?? [],
     legalPlays: legalPlays(state, viewerId),
     canPass: playing !== null && playing.turn === viewerId && playing.trick !== null,
