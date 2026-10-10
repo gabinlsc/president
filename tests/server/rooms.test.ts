@@ -221,6 +221,7 @@ describe('Salons Socket.IO', () => {
     const view = await humanTurn;
     expect(view.selfId).toBe(session.playerId);
     expect(view.members.filter((m) => m.isBot)).toHaveLength(4);
-    expect(view.game.legalPlays.length).toBeGreaterThan(0);
+    // On turn the player either has a legal play or may pass (never stuck).
+    expect(view.game.legalPlays.length > 0 || view.game.canPass).toBe(true);
   });
 });
