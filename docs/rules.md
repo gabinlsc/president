@@ -1,23 +1,57 @@
 # Règles et conventions
 
-52 cartes, ordre 3 < … < As < 2. Première manche : Dame de cœur obligatoire
-dans la première pose. Dame de pique : inversion immédiate de rotation.
+Moteur : `packages/game` (réducteur pur `transition(state, action)`). Chaque règle
+ci-dessous est couverte par `tests/game/*.test.ts`.
 
-Un pli commence en simples, paires ou triples. Les poses ordinaires conservent
-ce format. Une égalité est autorisée (exception à la montée stricte) et impose
-au suivant la même valeur ou une passe. Une passe lève cette contrainte.
-Un joueur qui passe reste hors du pli jusqu'au nettoyage; il peut néanmoins
-couper pour compléter un carré. Les cartes consécutives de même valeur restent
-comptées pour la coupe. Aucune coupe si le pli a commencé en triples.
-Un 2 respecte lui aussi le format et la contrainte d'égalité avant de nettoyer.
+## Cycle d'une table
 
-Une sortie termine immédiatement le pli : le voisin encore en jeu relance.
-Finir sur un 2 place le joueur derrière tous les non-pénalisés. S'il y a
-plusieurs pénalisés, le dernier à finir sur un 2 est dernier au classement.
-La manche s'arrête quand il ne reste qu'un joueur avec des cartes.
+`lobby → dealing → exchanging → playing → roundOver → dealing → …`
 
-La donne suivante comprend des échanges simultanés : 2 cartes entre Président
-et Trou du cul, 1 entre Vice-président et Vice-trouduc. Les rôles défavorisés
-donnent leurs meilleures cartes de la donne initiale. Les autres choisissent.
-À 2 ou 3 joueurs, seuls les rôles extrêmes échangent; à partir de 4, les vice-rôles
-s'appliquent. Le Trou du cul ouvre après les échanges. Le sens repart à l'endroit.
+Chaque action n'est acceptée que dans une seule phase (`ACTION_PHASES`) ; toute autre
+transition est refusée (`PHASE_TRANSITIONS`). La phase `exchanging` est sautée à la
+première manche.
+
+## Cartes et plis
+
+- 52 cartes, toutes distribuées. Ordre : 3 < 4 < … < 10 < V < D < R < As < 2.
+- La Dame de cœur débute la première manche : la première pose doit la contenir.
+- Un pli se lance en simples, paires ou triples ; il se poursuit dans ce format, à valeur
+  égale ou supérieure. Un carré ne s'ouvre pas.
+- **Même carte** : poser la même valeur que la pose précédente oblige le joueur suivant à
+  jouer cette valeur ou à passer. S'il la joue, le suivant subit la contrainte à son tour.
+  Une passe lève la contrainte.
+- Un joueur qui passe ne rejoue plus sur ce pli, sauf pour couper.
+- **Le 2** respecte le format et la contrainte « même carte », puis remporte le pli :
+  la table est nettoyée et son auteur relance.
+- **Dame de pique** : inverse immédiatement le sens de rotation (`isReversed`), y compris
+  posée dans une paire ou un triple.
+- **Couper** : compléter un carré avec les cartes de même valeur posées consécutivement sur
+  la table, même hors tour (y compris après avoir passé). La table est nettoyée et le coupeur
+  relance. Interdit si le pli a commencé en triples.
+- Quand tous les autres joueurs encore en jeu ont passé, le dernier poseur relance ; s'il
+  est sorti, c'est le joueur actif suivant.
+
+## Sorties et classement
+
+- **Arrêt sur victoire** : le premier joueur à finir (Président) arrête le pli ; son voisin
+  encore en jeu relance. Les joueurs qui finissent ensuite ne coupent pas le pli : leur tour
+  est simplement sauté.
+- **Punition du 2** : finir sur un 2 classe derrière tous les autres. Avec plusieurs punis,
+  le dernier à finir sur un 2 est dernier. Un puni ne devient jamais Président.
+- La manche s'arrête quand il ne reste qu'un joueur avec des cartes.
+- Rôles : 2 joueurs → Président, Trou du cul ; 3 joueurs → + Citoyen ; 4 joueurs et plus →
+  Président, Vice-président, Citoyens, Vice-trouduc, Trou du cul.
+
+## Échanges
+
+À partir de la deuxième manche, après la distribution :
+
+| Donne          | Reçoit         | Cartes | Choix                   |
+| -------------- | -------------- | ------ | ----------------------- |
+| Trou du cul    | Président      | 2      | ses meilleures (imposé) |
+| Président      | Trou du cul    | 2      | libre                   |
+| Vice-trouduc   | Vice-président | 1      | sa meilleure (imposé)   |
+| Vice-président | Vice-trouduc   | 1      | libre                   |
+
+Les cartes sont choisies dans la main distribuée et transférées simultanément.
+Le Trou du cul ouvre ensuite et le sens repart à l'endroit.
