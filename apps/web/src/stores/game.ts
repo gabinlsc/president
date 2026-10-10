@@ -80,8 +80,8 @@ export const useGameStore = defineStore('game', () => {
   /** Any legal play while it is not our turn is, by construction, a square cut. */
   const isCut = computed(() => canPlay.value && !isMyTurn.value);
   const canPass = computed(() => !!game.value?.canPass);
-  /** Out of turn, every legal play is a square cut offered by the server. */
-  const availableCut = computed(() => (!isMyTurn.value && game.value?.legalPlays[0]) || null);
+  /** A square the server lets us close right now, on our turn or out of turn. */
+  const availableCut = computed(() => game.value?.squarePlays[0] ?? null);
   const canExchange = computed(() => {
     const exchange = game.value?.exchange;
     return (

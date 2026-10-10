@@ -4,11 +4,12 @@ import type {
   ExchangeView,
   GameState,
   GameView,
+  PlayingState,
   PlayerId,
   PublicSeat,
   SeatStatus,
 } from '@president/shared';
-import { validatePlay } from './play';
+import { closesSquare, validatePlay } from './play';
 
 function statusOf(state: GameState, id: PlayerId, cardCount: number): SeatStatus {
   switch (state.phase) {
@@ -60,6 +61,16 @@ export function legalPlays(state: GameState, playerId: PlayerId): CardId[][] {
   return plays;
 }
 
+function squarePlays(state: PlayingState, viewerId: PlayerId): CardId[][] {
+  const hand = state.seats.find((s) => s.id === viewerId)?.hand ?? [];
+  return legalPlays(state, viewerId).filter((ids) =>
+    closesSquare(
+      state,
+      ids.map((id) => hand.find((c) => c.id === id)!),
+    ),
+  );
+}
+
 function exchangeOf(state: GameState, viewerId: PlayerId): ExchangeView | null {
   if (state.phase !== 'exchanging') return null;
   const transfer = state.transfers.find((t) => t.fromId === viewerId);
@@ -95,6 +106,7 @@ export function toGameView(state: GameState, viewerId: PlayerId): GameView {
     trick: playing?.trick ?? null,
     hand: state.seats.find((s) => s.id === viewerId)?.hand ?? [],
     legalPlays: legalPlays(state, viewerId),
+    squarePlays: playing ? squarePlays(playing, viewerId) : [],
     canPass: playing !== null && playing.turn === viewerId && playing.trick !== null,
     exchange: exchangeOf(state, viewerId),
     pendingExchanges:

@@ -34,6 +34,24 @@ describe('Vue par joueur', () => {
     ]);
   });
 
+  it('signale les poses qui ferment un carré, à son tour ou hors tour', () => {
+    const quad = [card(8), card(8, 'diamonds'), card(8, 'hearts'), card(8, 'spades')];
+    expect(toGameView(playing([[...quad, card(3)], [card(4)]]), 'p0').squarePlays).toEqual([
+      quad.map((c) => c.id),
+    ]);
+    const chain = run(
+      playing([
+        [card(6), card(9)],
+        [card(6, 'hearts'), card(10)],
+        [card(6, 'diamonds'), card(11)],
+        [card(6, 'spades'), card(12)],
+      ]),
+      [play('p0', card(6)), play('p1', card(6, 'hearts')), play('p2', card(6, 'diamonds'))],
+    ).state;
+    expect(toGameView(chain, 'p3').squarePlays).toEqual([['6-spades']]);
+    expect(toGameView(chain, 'p0').squarePlays).toEqual([]);
+  });
+
   it('décrit l’échange attendu du destinataire', () => {
     const exchanging = run(
       {

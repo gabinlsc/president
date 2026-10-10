@@ -225,3 +225,40 @@ describe('Salons Socket.IO', () => {
     expect(view.game.legalPlays.length > 0 || view.game.canPass).toBe(true);
   });
 });
+
+describe('Coupe par un humain', () => {
+  it('le serveur propose la coupe et l’accepte hors tour', async () => {
+    const { client, server } = await setup({
+      pacing: { dealDelay: 10, botDelay: 5000, clearPause: 0 },
+    });
+    const a = await client();
+    const started = until(a, (v) => v.game.phase === 'playing');
+    const session = ok(await ack(a, 'room:create', { name: 'Moi', mode: 'solo', bots: 4 }));
+    await started;
+    const room = server.rooms.store.get(session.code)!;
+    const ids = [...room.members.keys()];
+    const crafted = playing([
+      [card(6, 'spades'), card(3)],
+      [card(6), card(9)],
+      [card(6, 'hearts'), card(11)],
+      [card(6, 'diamonds'), card(13)],
+      [card(14), card(4)],
+    ]);
+    room.game = {
+      ...crafted,
+      seats: crafted.seats.map((s, i) => ({ ...s, id: ids[i]! })),
+      turn: ids[1]!,
+    };
+    room.version += 1;
+    const offered = until(a, (v) => v.game.legalPlays.length > 0);
+    server.rooms.play(room, room.members.get(ids[1]!)!, ['6-clubs']);
+    server.rooms.play(room, room.members.get(ids[2]!)!, ['6-hearts']);
+    server.rooms.play(room, room.members.get(ids[3]!)!, ['6-diamonds']);
+    const view = await offered;
+    expect(view.game.turn).not.toBe(view.selfId);
+    expect(view.game.legalPlays).toEqual([['6-spades']]);
+    const cleared = until(a, (v) => v.events.some((e) => e.type === 'trickCleared'));
+    ok(await ack(a, 'game:play', { cards: ['6-spades'] }));
+    expect((await cleared).game.turn).toBe(view.selfId);
+  });
+});

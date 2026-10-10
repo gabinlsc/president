@@ -41,6 +41,21 @@ export const completesSquare = (
   cards.every((c) => c.rank === trick.rank) &&
   trick.run + cards.length === SQUARE;
 
+/**
+ * Whether laying `cards` now completes four of a kind and clears the table: a square led on an
+ * empty table, the fourth card of a run laid on turn, or an out-of-turn cut.
+ */
+export function closesSquare(state: PlayingState, cards: readonly Card[]): boolean {
+  const { trick } = state;
+  if (!trick) return cards.length === SQUARE;
+  return (
+    trick.format !== 3 &&
+    cards.length === trick.format &&
+    cards.every((c) => c.rank === trick.rank) &&
+    trick.run + cards.length === SQUARE
+  );
+}
+
 /** Checks a play against every rule without changing anything. Throws `RuleBreak`. */
 export function validatePlay(
   state: PlayingState,
@@ -67,7 +82,6 @@ export function validatePlay(
 
   ensure(state.turn === playerId, 'NOT_YOUR_TURN');
   ensure(!state.passed.includes(playerId), 'ALREADY_PASSED');
-  ensure(cards.length < SQUARE, 'SQUARE_MUST_CUT');
   if (trick) {
     ensure(cards.length === trick.format, 'FORMAT_MISMATCH');
     if (trick.sameRankRequired) ensure(rank === trick.rank, 'SAME_RANK_REQUIRED');
@@ -114,7 +128,8 @@ export function play(
 
   const sameRank = previous !== null && previous.rank === rank;
   const trick: Trick = {
-    format: previous?.format ?? (cards.length as TrickFormat),
+    // A square led on an empty table closes at once: its size never becomes a format.
+    format: previous?.format ?? (Math.min(cards.length, 3) as TrickFormat),
     rank,
     ownerId: playerId,
     sameRankRequired: sameRank,
@@ -145,7 +160,9 @@ export function play(
   const reason: TrickClearReason | null =
     rank === RANK_TWO
       ? 'two'
-      : isCut || (trick.format !== 3 && trick.run === 4)
+      : isCut ||
+          (trick.format !== 3 && trick.run === SQUARE) ||
+          (!previous && cards.length === SQUARE)
         ? 'square'
         : becamePresident
           ? 'presidentOut'

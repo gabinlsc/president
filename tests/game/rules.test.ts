@@ -29,9 +29,27 @@ describe('Contrainte de format', () => {
     reject(state, { type: 'play', playerId: 'ghost', cards: ['3-clubs'] }, 'UNKNOWN_PLAYER');
   });
 
-  it('un carré ne s’ouvre pas : il sert uniquement à couper', () => {
+  it('un carré peut ouvrir le pli : il le ferme aussitôt et son auteur relance', () => {
     const quad = [card(8), card(8, 'diamonds'), card(8, 'hearts'), card(8, 'spades')];
-    reject(playing([[...quad, card(3)], [card(4)]]), play('p0', ...quad), 'SQUARE_MUST_CUT');
+    const { state, events } = apply(playing([[...quad, card(3)], [card(4)]]), play('p0', ...quad));
+    const game = asPlaying(state);
+    expect(game.trick).toBeNull();
+    expect(game.turn).toBe('p0');
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: 'trickCleared', reason: 'square', leaderId: 'p0' }),
+    );
+  });
+
+  it('un carré ne se pose pas sur un pli déjà lancé', () => {
+    const quad = [card(8), card(8, 'diamonds'), card(8, 'hearts'), card(8, 'spades')];
+    const state = apply(
+      playing([
+        [card(5), card(3)],
+        [...quad, card(4)],
+      ]),
+      play('p0', card(5)),
+    ).state;
+    reject(state, play('p1', ...quad), 'FORMAT_MISMATCH');
   });
 
   it('hors tour, seule une coupe est permise', () => {

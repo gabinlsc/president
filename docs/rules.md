@@ -16,7 +16,8 @@ première manche.
 - 52 cartes, toutes distribuées. Ordre : 3 < 4 < … < 10 < V < D < R < As < 2.
 - Le détenteur de la Dame de cœur débute la première manche, avec la carte de son choix.
 - Un pli se lance en simples, paires ou triples ; il se poursuit dans ce format, à valeur
-  égale ou supérieure. Un carré ne s'ouvre pas.
+  égale ou supérieure. Un carré complet peut ouvrir le pli : il le ferme aussitôt et son
+  auteur relance.
 - **Même carte** : poser la même valeur que la pose précédente oblige le joueur suivant à
   jouer cette valeur ou à passer. S'il la joue, le suivant subit la contrainte à son tour.
   Une passe lève la contrainte.
