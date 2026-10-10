@@ -1,5 +1,6 @@
 import type { Server, Socket } from 'socket.io';
 import {
+  autoCutSchema,
   cardsSchema,
   createRoomSchema,
   InputError,
@@ -113,6 +114,14 @@ export function bindTransport(
         const { cards } = parseInput(cardsSchema, input);
         const { room, member } = context();
         rooms.exchange(room, member, cards);
+        return null;
+      }),
+    );
+    socket.on('game:autoCut', (input: unknown, ack: unknown) =>
+      handle(ack, () => {
+        const { enabled } = parseInput(autoCutSchema, input);
+        const { room, member } = context();
+        rooms.setAutoCut(room, member, enabled);
         return null;
       }),
     );
