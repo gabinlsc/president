@@ -45,6 +45,8 @@ export interface GameView {
   /** Every play the viewer may legally make right now, including out-of-turn squares. */
   readonly legalPlays: readonly (readonly CardId[])[];
   readonly canPass: boolean;
+  /** The subset of `legalPlays` that completes a square and clears the table. */
+  readonly squarePlays: readonly (readonly CardId[])[];
   readonly exchange: ExchangeView | null;
   readonly pendingExchanges: number;
   readonly ranking: readonly PlayerId[];

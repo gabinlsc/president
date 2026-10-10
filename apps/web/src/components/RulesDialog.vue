@@ -20,7 +20,7 @@ const rules: readonly [string, string][] = [
   ['Dame de pique', 'Elle inverse immédiatement le sens de rotation.'],
   [
     'Couper',
-    'Compléter un carré sur la table se fait même hors tour et nettoie la table. Toujours avec autant de cartes que le format du pli, jamais sur un pli lancé en triples ni sur ses propres cartes. Le bouton « Couper » s’allume dès que c’est possible.',
+    'Compléter un carré sur la table se fait même hors tour et nettoie la table. Toujours avec autant de cartes que le format du pli, jamais sur un pli lancé en triples ni sur ses propres cartes. Un carré complet peut aussi ouvrir le pli : il le ferme aussitôt. Le bouton « Couper » s’allume dès que vous pouvez fermer un carré.',
   ],
   [
     'Sorties',

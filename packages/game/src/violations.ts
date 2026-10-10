@@ -14,7 +14,6 @@ export const RULE_MESSAGES: Readonly<Record<RuleViolationCode, string>> = {
   FORMAT_MISMATCH: 'Respectez le format du pli (simple, paire ou triple).',
   RANK_TOO_LOW: 'Jouez une valeur supérieure ou égale.',
   SAME_RANK_REQUIRED: 'Même carte obligatoire : jouez la même valeur ou passez.',
-  SQUARE_MUST_CUT: 'Un carré ne s’ouvre pas : il se complète sur la table pour couper.',
   CANNOT_PASS_ON_LEAD: 'Vous ouvrez le pli : posez une carte.',
   NO_EXCHANGE_EXPECTED: 'Vous n’avez aucune carte à choisir pour cet échange.',
   EXCHANGE_ALREADY_SUBMITTED: 'Échange déjà validé.',
