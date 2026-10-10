@@ -5,11 +5,26 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node"],
     "lib": ["ES2022", "DOM"]
   },
-  "include": ["apps/server/**/*.ts", "packages/**/*.ts", "tests/**/*.ts"]
+  "include": [
+    "apps/server/**/*.ts",
+    "packages/**/*.ts",
+    "tests/**/*.ts",
+    "e2e/**/*.ts",
+    "*.config.ts"
+  ]
 }

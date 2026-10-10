@@ -13,7 +13,7 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    env: { BOT_DELAY: '40' },
+    env: { BOT_DELAY: '40', DEAL_DELAY: '300', CLEAR_PAUSE: '60' },
     timeout: 30_000,
   },
 });

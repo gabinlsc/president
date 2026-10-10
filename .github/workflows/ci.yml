@@ -1,7 +1,7 @@
 name: Validation
 on:
   push:
-    branches: ['feature/**']
+    branches: ['feature/**', 'feat/**', 'refactor/**', 'fix/**']
   pull_request:
     branches: [main]
 permissions:

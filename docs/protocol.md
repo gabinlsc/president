@@ -1,22 +1,42 @@
-# Contrat réseau — v1
+# Contrat réseau — v2
 
-Socket.IO sur `/socket.io`, même origine en production. Chaque événement reçoit un ACK
-`{ok:true,data}` ou `{ok:false,error}`. Types : `packages/shared/src/index.ts`.
-Le serveur publie `room:state` individuellement : seule la main du destinataire apparaît.
+Socket.IO sur `/socket.io`, même origine en production. Types partagés :
+`packages/shared/src/types`. Entrées validées par les schémas zod de
+`packages/shared/src/schemas.ts`.
 
-| Client → serveur | Entrée                       | Résultat                                            |
-| ---------------- | ---------------------------- | --------------------------------------------------- |
-| room:create      | name, mode, bots (solo: 4–8) | Session, salon unique                               |
-| room:join        | code, name                   | Session, salon en attente, max 8 humains            |
-| session:resume   | token                        | Session, remplace la connexion précédente           |
-| room:start       | aucune                       | Hôte uniquement, 2–8 humains ou 1 humain + 4–8 bots |
-| room:leave       | aucune                       | Quitte le salon; en cours, remplacement par bot     |
-| game:play        | cards: identifiants uniques  | Coup validé par le moteur                           |
-| game:pass        | aucune                       | Passe validée par le moteur                         |
-| game:exchange    | cards: identifiants uniques  | Choix du Président / Vice-président                 |
-| game:next        | aucune                       | Hôte uniquement, manche suivante                    |
+Chaque requête reçoit un ACK `{ ok: true, data }` ou `{ ok: false, error }` (message
+affichable). Identité et autorisations viennent de la session serveur liée à la socket,
+jamais d'un identifiant envoyé par le client.
 
-Identités et autorisations viennent de la session serveur, jamais d'un playerId client.
-Une reconnexion utilise un jeton opaque aléatoire. Un déconnecté est temporairement joué
-par un bot. Salons en mémoire : redémarrer efface les sessions et parties.
-`GET /health` → 200 JSON `{status:"ok"}`; autres routes inconnues → 404.
+| Client → serveur | Entrée                       | Effet                                                 |
+| ---------------- | ---------------------------- | ----------------------------------------------------- |
+| `room:create`    | `name`, `mode`, `bots` (4–7) | Session ; en solo la donne démarre aussitôt           |
+| `room:join`      | `code`, `name`               | Session ; uniquement dans le lobby, 8 joueurs maximum |
+| `session:resume` | `token`                      | Session ; évince la socket précédente                 |
+| `room:start`     | —                            | Hôte uniquement, 2 joueurs minimum                    |
+| `room:leave`     | —                            | Lobby : libère la place. En partie : un bot reprend   |
+| `game:play`      | `cards` : identifiants       | Coup validé par le moteur (coupe hors tour comprise)  |
+| `game:pass`      | —                            | Passe                                                 |
+| `game:exchange`  | `cards` : identifiants       | Choix du Président / Vice-président                   |
+| `game:next`      | —                            | Hôte uniquement, manche suivante                      |
+
+## `room:state`
+
+Le serveur envoie à chaque membre son propre `RoomSnapshot` après chaque changement :
+
+- `version` : compteur monotone ; le client ignore un instantané plus ancien.
+- `game` (`GameView`) : phase, sièges publics (nombre de cartes, statut, rang), pli,
+  sens (`isReversed`), **la main du destinataire uniquement**, `legalPlays` (tous les coups
+  autorisés, coupes hors tour comprises) et `canPass`. Le client ne réimplémente aucune règle.
+- `events` : faits publics de la transition (`played`, `passed`, `reversed`,
+  `trickCleared`, `playerFinished`, `dealt`, `exchanged`, `roundOver`) qui pilotent les
+  animations et le fil de la partie.
+
+## Rythme
+
+Le serveur joue lui-même la fin de la distribution, les bots et les joueurs déconnectés.
+Il laisse `DEAL_DELAY` ms pour animer la donne, un temps de réflexion d'environ `BOT_DELAY` ms
+(± 25 %) entre deux coups automatiques, et ajoute `CLEAR_PAUSE` ms après un pli nettoyé.
+Une table sans humain connecté est gelée.
+
+`GET /health` → 200 `{"status":"ok"}` ; toute autre route inconnue → 404.
