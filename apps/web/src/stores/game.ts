@@ -24,6 +24,8 @@ export interface ClearedTrick {
   readonly id: number;
   readonly plays: readonly Play[];
   readonly reason: TrickClearReason;
+  /** Who takes the lead: the cleared pile slides towards them. */
+  readonly leaderId: PlayerId | null;
 }
 
 /** What a seat just did, shown briefly next to it so every move is attributed. */
@@ -122,7 +124,12 @@ export const useGameStore = defineStore('game', () => {
     }
     const clear = next.events.find((e) => e.type === 'trickCleared');
     if (clear?.type === 'trickCleared') {
-      cleared.value = { id: ++sequence, plays: clear.plays, reason: clear.reason };
+      cleared.value = {
+        id: ++sequence,
+        plays: clear.plays,
+        reason: clear.reason,
+        leaderId: clear.leaderId,
+      };
       clearTimeout(clearTimer);
       clearTimer = setTimeout(() => (cleared.value = null), CLEAR_DISPLAY_MS);
     } else if (next.game.trick) cleared.value = null;

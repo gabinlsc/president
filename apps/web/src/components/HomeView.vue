@@ -41,12 +41,16 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <main class="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+  <main class="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
     <section class="grid grid-cols-1 items-center gap-10 py-10 md:grid-cols-[1.1fr_1fr] md:py-16">
       <div>
         <p class="eyebrow">Le grand classique, rebattu</p>
         <h1 class="mt-4 font-display text-4xl leading-[1.05] sm:text-6xl">
-          Une bonne main.<br />Une <em class="text-moss">meilleure</em> compagnie.
+          Une bonne main.<br />Une
+          <em class="bg-gradient-to-r from-champagne to-gold bg-clip-text pr-1 text-transparent"
+            >meilleure</em
+          >
+          compagnie.
         </h1>
         <p class="mt-5 max-w-md text-ink-soft">
           Le Président en temps réel : entre amis avec un code de table, ou face à des bots qui
@@ -54,22 +58,26 @@ async function submit(): Promise<void> {
         </p>
       </div>
       <div
-        class="glass relative mx-auto flex h-64 w-full max-w-sm items-center justify-center rounded-[2rem]"
+        class="felt relative mx-auto grid h-72 w-full max-w-md place-items-center rounded-[50%] sm:h-80"
         aria-hidden="true"
       >
-        <div class="flex -space-x-6">
-          <PlayingCard
+        <div class="relative h-40 w-64">
+          <span
             v-for="(card, i) in showcase"
             :key="card.id"
-            :card="card"
-            size="lg"
-            :class="
-              ['-rotate-12 translate-y-2', 'z-10 -translate-y-2', 'rotate-12 translate-y-2'][i]
-            "
-          />
+            class="float-card absolute top-0 left-1/2 -ml-12"
+            :style="{
+              '--r': `${(i - 1) * 14}deg`,
+              '--d': `${i * 0.6}s`,
+              translate: `${(i - 1) * 74}px ${Math.abs(i - 1) * 14}px`,
+              zIndex: i === 1 ? 2 : 1,
+            }"
+          >
+            <PlayingCard :card="card" size="lg" />
+          </span>
         </div>
-        <span class="absolute bottom-4 text-xs text-ink-soft"
-          >52 cartes. Une seule présidence.</span
+        <span class="absolute bottom-8 text-xs tracking-[0.2em] text-champagne/70 uppercase"
+          >52 cartes · une seule présidence</span
         >
       </div>
     </section>
@@ -91,13 +99,13 @@ async function submit(): Promise<void> {
             </p>
           </div>
           <div
-            class="flex items-center justify-between rounded-2xl bg-white/60 px-4 py-2.5 text-sm"
+            class="flex items-center justify-between rounded-2xl bg-surface/60 px-4 py-2.5 text-sm"
           >
             <span>Adversaires bots</span>
             <div class="flex items-center gap-3">
               <button
                 type="button"
-                class="grid size-8 place-items-center rounded-full bg-white shadow-sm disabled:opacity-40"
+                class="grid size-8 place-items-center rounded-full bg-surface shadow-sm disabled:opacity-40"
                 aria-label="Un bot de moins"
                 :disabled="bots <= MIN_SOLO_BOTS"
                 @click="bots--"
@@ -107,7 +115,7 @@ async function submit(): Promise<void> {
               <output class="w-4 text-center font-semibold" aria-live="polite">{{ bots }}</output>
               <button
                 type="button"
-                class="grid size-8 place-items-center rounded-full bg-white shadow-sm disabled:opacity-40"
+                class="grid size-8 place-items-center rounded-full bg-surface shadow-sm disabled:opacity-40"
                 aria-label="Un bot de plus"
                 :disabled="bots >= MAX_SOLO_BOTS"
                 @click="bots++"
@@ -118,7 +126,7 @@ async function submit(): Promise<void> {
           </div>
           <button
             type="button"
-            class="btn-primary mt-auto"
+            class="btn-gold mt-auto"
             :disabled="disabled"
             @click="intent = 'solo'"
           >
@@ -147,7 +155,7 @@ async function submit(): Promise<void> {
             <input
               id="room-code"
               v-model="code"
-              class="min-w-0 flex-1 rounded-full border border-white/80 bg-white/70 px-4 text-sm tracking-[0.2em] uppercase placeholder:tracking-normal placeholder:normal-case focus:outline-moss"
+              class="min-w-0 flex-1 rounded-full border border-surface/80 bg-surface/70 px-4 text-sm tracking-[0.2em] uppercase placeholder:tracking-normal placeholder:normal-case focus:outline-moss"
               size="8"
               maxlength="4"
               pattern="[A-Fa-f0-9]{4}"
@@ -169,7 +177,7 @@ async function submit(): Promise<void> {
         <input
           id="player-name"
           v-model="name"
-          class="w-full rounded-2xl border border-white bg-white/80 px-4 py-3 focus:outline-moss"
+          class="w-full rounded-2xl border border-surface bg-surface/80 px-4 py-3 focus:outline-moss"
           :maxlength="NAME_MAX_LENGTH"
           autocomplete="nickname"
           required

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ArrowLeft, BookOpen, Check, Crown, LogOut, WifiOff } from '@lucide/vue';
+import { ArrowLeft, BookOpen, Check, Crown, LogOut, Moon, Sun, WifiOff } from '@lucide/vue';
+import { theme, toggleTheme } from './lib/theme';
 import { useGameStore } from './stores/game';
 import GameTable from './components/GameTable.vue';
 import HomeView from './components/HomeView.vue';
@@ -27,7 +28,7 @@ async function leave(): Promise<void> {
 <template>
   <div class="flex min-h-dvh flex-col">
     <header
-      class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6"
+      class="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6"
     >
       <button
         type="button"
@@ -41,6 +42,18 @@ async function leave(): Promise<void> {
         le président<span class="text-moss">.</span>
       </button>
       <nav class="flex items-center gap-2 text-sm" aria-label="Navigation principale">
+        <button
+          type="button"
+          class="btn-ghost min-h-9 px-3"
+          :aria-label="theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'"
+          data-testid="theme-toggle"
+          @click="toggleTheme"
+        >
+          <Transition name="fade" mode="out-in">
+            <Sun v-if="theme === 'dark'" key="sun" :size="15" />
+            <Moon v-else key="moon" :size="15" />
+          </Transition>
+        </button>
         <button type="button" class="btn-ghost min-h-9 px-3" @click="showRules = true">
           <BookOpen :size="15" /> Les règles
         </button>
@@ -58,7 +71,7 @@ async function leave(): Promise<void> {
     </header>
 
     <HomeView v-if="view === 'home'" />
-    <main v-else class="mx-auto w-full max-w-6xl flex-1 px-4 pb-12 sm:px-6">
+    <main v-else class="mx-auto w-full max-w-7xl flex-1 px-4 pb-12 sm:px-6">
       <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
@@ -78,7 +91,7 @@ async function leave(): Promise<void> {
       </Transition>
     </main>
 
-    <footer class="mx-auto w-full max-w-6xl px-4 py-6 text-xs text-ink-soft sm:px-6">
+    <footer class="mx-auto w-full max-w-7xl px-4 py-6 text-xs text-ink-soft sm:px-6">
       Fait pour les bonnes compagnies · ♣ ♦ ♠ ♥
     </footer>
 
@@ -123,7 +136,7 @@ async function leave(): Promise<void> {
       <Transition name="fade">
         <div
           v-if="store.error && view !== 'home'"
-          class="pointer-events-auto flex items-center gap-3 rounded-full bg-heart/90 px-4 py-2 text-sm text-white shadow-lg backdrop-blur"
+          class="pointer-events-auto flex items-center gap-3 rounded-full bg-heart/90 px-4 py-2 text-sm text-sand shadow-lg backdrop-blur"
           role="alert"
           data-testid="error"
         >
