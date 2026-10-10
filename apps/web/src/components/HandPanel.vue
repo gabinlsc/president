@@ -132,7 +132,7 @@ const turnLabel = computed(() => {
               ? 'cut-ready border-gold bg-gold text-white'
               : 'border-ink/10 bg-ink/5 text-ink-soft'
           "
-          title="S’active dès qu’un carré peut être complété hors tour."
+          title="S’active dès que vous pouvez fermer un carré, à votre tour ou hors tour."
           :disabled="!store.availableCut || store.pending || !store.connected"
           data-testid="cut"
           @click="store.cut()"
