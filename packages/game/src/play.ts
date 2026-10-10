@@ -25,8 +25,9 @@ export interface ValidPlay {
 }
 
 /**
- * A square can be completed on any trick that did not start in triples, but never on top of
- * one's own play: the last cards of the run must come from someone else.
+ * A square can be completed on any trick that did not start in triples, with as many cards as
+ * the trick format, and never on top of one's own play: the last cards of the run must come
+ * from someone else.
  */
 export const completesSquare = (
   trick: Trick | null,
@@ -36,6 +37,7 @@ export const completesSquare = (
   trick !== null &&
   trick.ownerId !== playerId &&
   trick.format !== 3 &&
+  cards.length === trick.format &&
   cards.every((c) => c.rank === trick.rank) &&
   trick.run + cards.length === SQUARE;
 

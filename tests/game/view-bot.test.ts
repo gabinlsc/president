@@ -18,13 +18,13 @@ describe('Vue par joueur', () => {
   it('propose la coupe hors tour et toute ouverture', () => {
     const state = apply(
       playing([
-        [card(6), card(9)],
+        [card(6), card(6, 'diamonds'), card(9)],
         [card(10)],
-        [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades')],
+        [card(6, 'hearts'), card(6, 'spades')],
       ]),
-      play('p0', card(6)),
+      play('p0', card(6), card(6, 'diamonds')),
     ).state;
-    expect(legalPlays(state, 'p2')).toEqual([['6-hearts', '6-diamonds', '6-spades']]);
+    expect(legalPlays(state, 'p2')).toEqual([['6-hearts', '6-spades']]);
     const opening = playing([[card(12, 'hearts'), card(12, 'spades'), card(3)], [card(4)]]);
     expect(legalPlays(opening, 'p0')).toEqual([
       ['3-clubs'],
@@ -152,11 +152,11 @@ describe('Bots', () => {
   it('coupe hors tour quand il le peut', () => {
     const state = apply(
       playing([
-        [card(6), card(9)],
+        [card(6), card(6, 'diamonds'), card(9)],
         [card(10)],
-        [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(3)],
+        [card(6, 'hearts'), card(6, 'spades'), card(3)],
       ]),
-      play('p0', card(6)),
+      play('p0', card(6), card(6, 'diamonds')),
     ).state;
     expect(chooseBotAction(state, 'p2')?.type).toBe('play');
   });

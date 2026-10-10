@@ -24,9 +24,6 @@ export interface JoinRoomInput {
 export interface ResumeInput {
   readonly token: string;
 }
-export interface AutoCutInput {
-  readonly enabled: boolean;
-}
 export interface CardsInput {
   readonly cards: readonly CardId[];
 }
@@ -41,7 +38,6 @@ export interface ClientToServerEvents {
   'game:pass': (ack: Ack) => void;
   'game:exchange': (input: CardsInput, ack: Ack) => void;
   'game:next': (ack: Ack) => void;
-  'game:autoCut': (input: AutoCutInput, ack: Ack) => void;
 }
 
 export interface ServerToClientEvents {

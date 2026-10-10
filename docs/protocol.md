@@ -19,7 +19,6 @@ jamais d'un identifiant envoyé par le client.
 | `game:pass`      | —                            | Passe                                                 |
 | `game:exchange`  | `cards` : identifiants       | Choix du Président / Vice-président                   |
 | `game:next`      | —                            | Hôte uniquement, manche suivante                      |
-| `game:autoCut`   | `enabled` : booléen          | Coupe automatique hors tour pour ce joueur            |
 
 ## `room:state`
 

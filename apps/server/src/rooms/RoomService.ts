@@ -62,7 +62,6 @@ export class RoomService {
           name,
           isBot: true,
           connected: false,
-          autoCut: false,
           socketId: null,
           token: null,
         };
@@ -131,11 +130,6 @@ export class RoomService {
     this.dispatch(room, { type: 'exchange', playerId: member.id, cards });
   }
 
-  setAutoCut(room: Room, member: Member, enabled: boolean): void {
-    member.autoCut = enabled;
-    this.commit(room, []);
-  }
-
   /** Explicit departure: the token is revoked; mid-game the seat is handed to a bot. */
   leave(room: Room, member: Member): void {
     this.store.revoke(member);
@@ -182,7 +176,6 @@ export class RoomService {
       mode: room.mode,
       hostId: room.hostId,
       selfId,
-      autoCut: room.members.get(selfId)?.autoCut ?? false,
       members: members.map((m) => ({
         id: m.id,
         name: m.name,
@@ -201,7 +194,6 @@ export class RoomService {
       name,
       isBot: false,
       connected: true,
-      autoCut: false,
       socketId,
       token: randomBytes(32).toString('hex'),
     };
@@ -287,11 +279,6 @@ export class RoomService {
     this.timers.set(room.code, timer);
   }
 
-  /** Short enough to beat any bot, long enough to see the card that made the square. */
-  private autoCutDelay(): number {
-    return Math.round(this.options.pacing.botDelay * 0.35);
-  }
-
   private thinkingTime(): number {
     return Math.round(this.options.pacing.botDelay * (0.75 + Math.random() * 0.5));
   }
@@ -303,25 +290,22 @@ export class RoomService {
     if (game.phase === 'dealing')
       return { action: { type: 'completeDeal' }, delay: pacing.dealDelay };
     const automated = [...room.members.values()].filter(isAutomated);
-    const pause = room.lastEvents.some((e) => e.type === 'trickCleared') ? pacing.clearPause : 0;
+    const basePause = room.lastEvents.some((e) => e.type === 'trickCleared')
+      ? pacing.clearPause
+      : 0;
     if (game.phase === 'exchanging') {
       for (const member of automated) {
         const action = chooseBotAction(game, member.id);
-        if (action) return { action, delay: this.thinkingTime() };
+        if (action) return { action, delay: basePause + this.thinkingTime() };
       }
       return null;
     }
     if (game.phase !== 'playing') return null;
-    // Players who asked for it cut first, faster than any bot can react.
-    for (const member of room.members.values()) {
-      if (!member.autoCut || isAutomated(member) || member.id === game.turn) continue;
-      const [cut] = legalPlays(game, member.id);
-      if (cut)
-        return {
-          action: { type: 'play', playerId: member.id, cards: cut },
-          delay: this.autoCutDelay(),
-        };
-    }
+    // A connected human who can cut gets time to press the button before any bot moves.
+    const humanCanCut = [...room.members.values()].some(
+      (m) => !isAutomated(m) && m.id !== game.turn && legalPlays(game, m.id).length > 0,
+    );
+    const pause = basePause + (humanCanCut ? pacing.botDelay * 2 : 0);
     // Squares can be laid out of turn: give automated players that chance first.
     for (const member of automated) {
       if (member.id === game.turn) continue;

@@ -155,6 +155,20 @@
   transform: translateY(24px) scale(0.85);
 }
 
+/* The cut button pulses while a square is on offer. */
+@keyframes cut-ready {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(184 138 62 / 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgb(184 138 62 / 0);
+  }
+}
+.cut-ready {
+  animation: cut-ready 1s ease-in-out infinite;
+}
+
 /* Your turn: the hand panel glows. */
 .hand-active {
   animation: seat-glow 1.6s ease-in-out infinite;

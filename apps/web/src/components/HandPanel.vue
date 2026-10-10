@@ -127,13 +127,17 @@ const turnLabel = computed(() => {
           v-if="game.phase === 'playing' && store.self?.status !== 'finished'"
           type="button"
           class="btn min-h-11 border px-4"
-          :class="store.autoCut ? 'border-gold bg-gold text-white' : 'glass text-ink'"
-          :aria-pressed="store.autoCut"
-          title="Le serveur coupe pour vous dès qu’un carré est possible (jamais sur vos propres cartes)."
-          :disabled="store.pending || !store.connected"
-          @click="store.setAutoCut(!store.autoCut)"
+          :class="
+            store.availableCut
+              ? 'cut-ready border-gold bg-gold text-white'
+              : 'border-ink/10 bg-ink/5 text-ink-soft'
+          "
+          title="S’active dès qu’un carré peut être complété hors tour."
+          :disabled="!store.availableCut || store.pending || !store.connected"
+          data-testid="cut"
+          @click="store.cut()"
         >
-          <Zap :size="15" /> Coupe auto
+          <Zap :size="15" /> Couper
         </button>
         <template v-if="game.phase === 'exchanging'">
           <button

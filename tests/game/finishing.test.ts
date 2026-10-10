@@ -84,11 +84,11 @@ describe('Arrêt sur victoire', () => {
   it('une coupe pour sortir nettoie la table et ne laisse pas rejouer le joueur sorti', () => {
     const { state, events } = run(
       playing([
-        [card(6), card(9)],
+        [card(6), card(6, 'diamonds'), card(9)],
         [card(10), card(11)],
-        [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')],
+        [card(6, 'hearts'), card(6, 'spades')],
       ]),
-      [play('p0', card(6)), play('p2', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'))],
+      [play('p0', card(6), card(6, 'diamonds')), play('p2', card(6, 'hearts'), card(6, 'spades'))],
     );
     const game = asPlaying(state);
     expect(game.finished).toEqual(['p2']);

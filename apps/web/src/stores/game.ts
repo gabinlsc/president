@@ -80,7 +80,8 @@ export const useGameStore = defineStore('game', () => {
   /** Any legal play while it is not our turn is, by construction, a square cut. */
   const isCut = computed(() => canPlay.value && !isMyTurn.value);
   const canPass = computed(() => !!game.value?.canPass);
-  const autoCut = computed(() => !!snapshot.value?.autoCut);
+  /** Out of turn, every legal play is a square cut offered by the server. */
+  const availableCut = computed(() => (!isMyTurn.value && game.value?.legalPlays[0]) || null);
   const canExchange = computed(() => {
     const exchange = game.value?.exchange;
     return (
@@ -162,7 +163,14 @@ export const useGameStore = defineStore('game', () => {
   const start = () => run(() => call('room:start'));
   const nextRound = () => run(() => call('game:next'));
   const pass = () => run(() => call('game:pass'));
-  const setAutoCut = (enabled: boolean) => run(() => call('game:autoCut', { enabled }));
+
+  /** Lays the square the server offers, in one click. */
+  async function cut(): Promise<void> {
+    const cards = availableCut.value;
+    if (!cards) return;
+    const done = await run(() => call('game:play', { cards: [...cards] }));
+    if (done !== undefined) selected.value = [];
+  }
 
   function flash(playerId: PlayerId, action: Omit<SeatAction, 'id'>): void {
     const previous = seatActions.value[playerId];
@@ -242,8 +250,8 @@ export const useGameStore = defineStore('game', () => {
     selected,
     cleared,
     seatActions,
-    autoCut,
-    setAutoCut,
+    availableCut,
+    cut,
     log,
     selfId,
     self,

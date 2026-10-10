@@ -172,44 +172,64 @@ describe('Contrainte « même carte »', () => {
 });
 
 describe('Couper (Carré)', () => {
-  it('hors tour, trois cartes complètent un simple : la table est nettoyée et le coupeur relance', () => {
+  it('hors tour, un 4e simple complète trois simples : table nettoyée, le coupeur relance', () => {
     const { state, events } = run(
       playing([
         [card(6), card(9)],
-        [card(10)],
-        [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(7)],
+        [card(6, 'hearts'), card(10)],
+        [card(6, 'diamonds'), card(11)],
+        [card(12), card(13)],
+        [card(6, 'spades'), card(7)],
       ]),
-      [play('p0', card(6)), play('p2', card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'))],
+      [
+        play('p0', card(6)),
+        play('p1', card(6, 'hearts')),
+        play('p2', card(6, 'diamonds')),
+        play('p4', card(6, 'spades')),
+      ],
     );
     const game = asPlaying(state);
     expect(game.trick).toBeNull();
-    expect(game.turn).toBe('p2');
+    expect(game.turn).toBe('p4');
     expect(events).toContainEqual(
-      expect.objectContaining({ type: 'played', playerId: 'p2', outOfTurn: true }),
+      expect.objectContaining({ type: 'played', playerId: 'p4', outOfTurn: true }),
     );
     expect(events).toContainEqual(
-      expect.objectContaining({ type: 'trickCleared', reason: 'square', leaderId: 'p2' }),
+      expect.objectContaining({ type: 'trickCleared', reason: 'square', leaderId: 'p4' }),
     );
   });
 
-  it('une paire complète deux simples consécutifs de même valeur', () => {
-    const game = asPlaying(
-      run(
-        playing([
-          [card(6), card(9)],
-          [card(6, 'hearts'), card(10)],
-          [card(3), card(4)],
-          [card(6, 'spades'), card(6, 'diamonds'), card(7)],
-        ]),
-        [
-          play('p0', card(6)),
-          play('p1', card(6, 'hearts')),
-          play('p3', card(6, 'spades'), card(6, 'diamonds')),
-        ],
-      ).state,
+  it('une coupe utilise autant de cartes que le format : pas de paire sur deux simples', () => {
+    const state = run(
+      playing([
+        [card(4), card(9)],
+        [card(4, 'hearts'), card(10)],
+        [card(4, 'spades'), card(4, 'diamonds'), card(7)],
+      ]),
+      [play('p0', card(4)), play('p1', card(4, 'hearts'))],
+    ).state;
+    // p2 holds the two missing 4s but may only lay one of them.
+    reject(state, play('p2', card(4, 'spades'), card(4, 'diamonds')), 'FORMAT_MISMATCH');
+    const after = asPlaying(apply(state, play('p2', card(4, 'spades'))).state);
+    expect(after.trick?.run).toBe(3);
+    // Its last 4 cannot cut on its own play.
+    reject(after, play('p2', card(4, 'diamonds')), 'NOT_YOUR_TURN');
+  });
+
+  it('pas de triple pour couper un simple', () => {
+    const state = apply(
+      playing([
+        [card(6), card(9)],
+        [card(10), card(11)],
+        [card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(7)],
+      ]),
+      play('p0', card(6)),
+    ).state;
+    reject(
+      state,
+      play('p2', card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades')),
+      'NOT_YOUR_TURN',
     );
-    expect(game.trick).toBeNull();
-    expect(game.turn).toBe('p3');
   });
 
   it('une paire coupe un pli lancé en paires', () => {
@@ -242,91 +262,61 @@ describe('Couper (Carré)', () => {
     reject(state, play('p2', card(6, 'spades')), 'NOT_YOUR_TURN');
   });
 
-  it('interdit la coupe sur un pli commencé en triples même après une surenchère', () => {
-    const state = run(
-      playing([
-        [card(5), card(5, 'hearts'), card(5, 'diamonds'), card(3)],
-        [card(6), card(6, 'hearts'), card(6, 'diamonds'), card(4)],
-        [card(10), card(11)],
-        [card(6, 'spades'), card(8)],
-      ]),
-      [
-        play('p0', card(5), card(5, 'hearts'), card(5, 'diamonds')),
-        play('p1', card(6), card(6, 'hearts'), card(6, 'diamonds')),
-      ],
-    ).state;
-    reject(state, play('p3', card(6, 'spades')), 'NOT_YOUR_TURN');
-  });
-
   it('un joueur qui a passé peut revenir dans le pli en coupant', () => {
     const game = asPlaying(
       run(
         playing([
           [card(6), card(9)],
-          [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'), card(10)],
-          [card(7), card(11)],
-        ]),
-        [
-          play('p0', card(6)),
-          pass('p1'),
-          play('p1', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')),
-        ],
-      ).state,
-    );
-    expect(game.passed).toEqual([]);
-    expect(game.turn).toBe('p1');
-  });
-
-  it('on ne coupe pas sur ses propres cartes', () => {
-    const state = apply(
-      playing([
-        [card(6), card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades'), card(9)],
-        [card(10), card(11)],
-        [card(12), card(13)],
-      ]),
-      play('p0', card(6)),
-    ).state;
-    reject(
-      state,
-      play('p0', card(6, 'hearts'), card(6, 'diamonds'), card(6, 'spades')),
-      'NOT_YOUR_TURN',
-    );
-  });
-
-  it('on peut couper si un autre joueur a posé la dernière carte de la série', () => {
-    const game = asPlaying(
-      run(
-        playing([
-          [card(6), card(6, 'diamonds'), card(6, 'spades'), card(9)],
-          [card(6, 'hearts'), card(11)],
-          [card(12), card(13)],
+          [card(6, 'hearts'), card(10)],
+          [card(6, 'diamonds'), card(11)],
+          [card(6, 'spades'), card(12)],
         ]),
         [
           play('p0', card(6)),
           play('p1', card(6, 'hearts')),
-          play('p0', card(6, 'diamonds'), card(6, 'spades')),
+          pass('p2'),
+          // p2 passed, yet the run is still 2: a third 6 by p3 then the cut by p2.
         ],
       ).state,
     );
-    expect(game.trick).toBeNull();
-    expect(game.turn).toBe('p0');
+    expect(game.turn).toBe('p3');
+    const afterThird = apply(game, play('p3', card(6, 'spades'))).state;
+    const cut = asPlaying(apply(afterThird, play('p2', card(6, 'diamonds'))).state);
+    expect(cut.trick).toBeNull();
+    expect(cut.passed).toEqual([]);
+    expect(cut.turn).toBe('p2');
+  });
+
+  it('on ne coupe pas sur ses propres cartes', () => {
+    const state = run(
+      playing([
+        [card(6), card(9)],
+        [card(6, 'hearts'), card(10)],
+        [card(6, 'diamonds'), card(6, 'spades'), card(11)],
+        [card(12), card(13)],
+      ]),
+      [play('p0', card(6)), play('p1', card(6, 'hearts')), play('p2', card(6, 'diamonds'))],
+    ).state;
+    reject(state, play('p2', card(6, 'spades')), 'NOT_YOUR_TURN');
   });
 
   it('la série est rompue par une autre valeur : pas de coupe', () => {
     const state = run(
       playing([
         [card(6), card(9)],
-        [card(7), card(10)],
-        [card(11), card(13)],
-        [card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds'), card(3)],
+        [card(6, 'hearts'), card(10)],
+        [card(6, 'spades'), card(13)],
+        [card(13, 'hearts'), card(3)],
       ]),
-      [play('p0', card(6)), play('p1', card(7))],
+      [
+        play('p0', card(6)),
+        play('p1', card(6, 'hearts')),
+        pass('p2'),
+        play('p3', card(13, 'hearts')),
+      ],
     ).state;
-    reject(
-      state,
-      play('p3', card(6, 'hearts'), card(6, 'spades'), card(6, 'diamonds')),
-      'NOT_YOUR_TURN',
-    );
+    // The run of 6s was broken by a King: the last 6 no longer cuts.
+    reject(state, play('p2', card(6, 'spades')), 'NOT_YOUR_TURN');
   });
 
   it('un carré complété à son tour par égalités nettoie aussi la table', () => {
