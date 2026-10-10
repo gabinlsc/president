@@ -18,6 +18,9 @@ function score(state: PlayingState, playerId: PlayerId, ids: readonly CardId[]):
   const cards = hand.filter((c) => ids.includes(c.id));
   const rank = cards[0]!.rank;
   if (cards.length === hand.length) return rank === RANK_TWO ? 1000 : -1000;
+  // Ending on a 2 is punished: once 2s are as many as the other cards, spend them now.
+  const twos = hand.filter((c) => c.rank === RANK_TWO).length;
+  if (rank === RANK_TWO && hand.length - twos <= twos) return -500 - cards.length;
   const groupSize = hand.filter((c) => c.rank === rank).length;
   return (
     rank * 3 -
@@ -46,6 +49,7 @@ function choosePlay(state: PlayingState, playerId: PlayerId): GameAction | null 
   if (
     state.trick &&
     !state.trick.sameRankRequired &&
+    score(state, playerId, best) > -500 &&
     bestRank >= ACE &&
     best.length < hand.length &&
     opponentsComfortable

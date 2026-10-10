@@ -125,6 +125,27 @@ describe('Bots', () => {
     );
   });
 
+  it('se débarrasse de ses 2 avant la fin pour éviter la punition', () => {
+    expect(
+      chooseBotAction(
+        playing([
+          [card(9), card(15)],
+          [card(4), card(5)],
+        ]),
+        'p0',
+      ),
+    ).toEqual(play('p0', card(15)));
+    expect(
+      chooseBotAction(
+        playing([
+          [card(9), card(15), card(15, 'hearts')],
+          [card(4), card(5)],
+        ]),
+        'p0',
+      ),
+    ).toEqual(play('p0', card(15), card(15, 'hearts')));
+  });
+
   it('coupe hors tour quand il le peut', () => {
     const state = apply(
       playing([
