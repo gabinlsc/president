@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import { MAX_PLAYERS } from './types/game';
 import type { CardId } from './types/cards';
-import type { CardsInput, CreateRoomInput, JoinRoomInput, ResumeInput } from './types/protocol';
+import type {
+  AutoCutInput,
+  CardsInput,
+  CreateRoomInput,
+  JoinRoomInput,
+  ResumeInput,
+} from './types/protocol';
 
 export const MIN_SOLO_BOTS = 4;
 export const MAX_SOLO_BOTS = MAX_PLAYERS - 1;
@@ -55,6 +61,10 @@ export const cardsSchema = z.object({
     .max(4, 'Sélection de cartes invalide.')
     .refine((ids) => new Set(ids).size === ids.length, 'Sélection de cartes invalide.'),
 }) satisfies z.ZodType<CardsInput>;
+
+export const autoCutSchema = z.object({
+  enabled: z.boolean({ error: 'Valeur invalide.' }),
+}) satisfies z.ZodType<AutoCutInput>;
 
 /** Malformed client input; its message is safe to show to the player. */
 export class InputError extends Error {}

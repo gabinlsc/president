@@ -41,7 +41,6 @@ export interface GameView {
   readonly seats: readonly PublicSeat[];
   readonly turn: PlayerId | null;
   readonly trick: TrickView | null;
-  readonly mustOpenWith: CardId | null;
   readonly hand: readonly Card[];
   /** Every play the viewer may legally make right now, including out-of-turn squares. */
   readonly legalPlays: readonly (readonly CardId[])[];
@@ -66,6 +65,8 @@ export interface RoomSnapshot {
   readonly hostId: PlayerId;
   readonly selfId: PlayerId;
   readonly members: readonly MemberView[];
+  /** The viewer asked the server to cut for them as soon as a square is possible. */
+  readonly autoCut: boolean;
   /** Monotonic counter; lets the client drop out-of-order snapshots. */
   readonly version: number;
   readonly game: GameView;

@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { chooseBotAction, createGame, toGameView, transition } from '@president/game';
+import { chooseBotAction, createGame, legalPlays, toGameView, transition } from '@president/game';
 import type {
   CardId,
   CreateRoomInput,
@@ -62,6 +62,7 @@ export class RoomService {
           name,
           isBot: true,
           connected: false,
+          autoCut: false,
           socketId: null,
           token: null,
         };
@@ -130,6 +131,11 @@ export class RoomService {
     this.dispatch(room, { type: 'exchange', playerId: member.id, cards });
   }
 
+  setAutoCut(room: Room, member: Member, enabled: boolean): void {
+    member.autoCut = enabled;
+    this.commit(room, []);
+  }
+
   /** Explicit departure: the token is revoked; mid-game the seat is handed to a bot. */
   leave(room: Room, member: Member): void {
     this.store.revoke(member);
@@ -176,6 +182,7 @@ export class RoomService {
       mode: room.mode,
       hostId: room.hostId,
       selfId,
+      autoCut: room.members.get(selfId)?.autoCut ?? false,
       members: members.map((m) => ({
         id: m.id,
         name: m.name,
@@ -194,6 +201,7 @@ export class RoomService {
       name,
       isBot: false,
       connected: true,
+      autoCut: false,
       socketId,
       token: randomBytes(32).toString('hex'),
     };
@@ -279,6 +287,11 @@ export class RoomService {
     this.timers.set(room.code, timer);
   }
 
+  /** Short enough to beat any bot, long enough to see the card that made the square. */
+  private autoCutDelay(): number {
+    return Math.round(this.options.pacing.botDelay * 0.35);
+  }
+
   private thinkingTime(): number {
     return Math.round(this.options.pacing.botDelay * (0.75 + Math.random() * 0.5));
   }
@@ -299,6 +312,16 @@ export class RoomService {
       return null;
     }
     if (game.phase !== 'playing') return null;
+    // Players who asked for it cut first, faster than any bot can react.
+    for (const member of room.members.values()) {
+      if (!member.autoCut || isAutomated(member) || member.id === game.turn) continue;
+      const [cut] = legalPlays(game, member.id);
+      if (cut)
+        return {
+          action: { type: 'play', playerId: member.id, cards: cut },
+          delay: this.autoCutDelay(),
+        };
+    }
     // Squares can be laid out of turn: give automated players that chance first.
     for (const member of automated) {
       if (member.id === game.turn) continue;

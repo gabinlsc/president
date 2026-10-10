@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { chooseBotAction, createGame, legalPlays, toGameView, transition } from '@president/game';
-import { DECK_SIZE, QUEEN_OF_HEARTS, type GameAction, type GameState } from '@president/shared';
+import { DECK_SIZE, type GameAction, type GameState } from '@president/shared';
 import { apply, card, play, playing, run } from './helpers';
 
 describe('Vue par joueur', () => {
@@ -15,7 +15,7 @@ describe('Vue par joueur', () => {
     expect(toGameView(state, 'p0').legalPlays).toEqual([['3-clubs'], ['4-clubs']]);
   });
 
-  it('propose la coupe hors tour et l’ouverture imposée', () => {
+  it('propose la coupe hors tour et toute ouverture', () => {
     const state = apply(
       playing([
         [card(6), card(9)],
@@ -25,10 +25,13 @@ describe('Vue par joueur', () => {
       play('p0', card(6)),
     ).state;
     expect(legalPlays(state, 'p2')).toEqual([['6-hearts', '6-diamonds', '6-spades']]);
-    const opening = playing([[card(12, 'hearts'), card(12, 'spades'), card(3)], [card(4)]], {
-      mustOpenWith: QUEEN_OF_HEARTS,
-    });
-    expect(legalPlays(opening, 'p0')).toEqual([['12-hearts'], ['12-hearts', '12-spades']]);
+    const opening = playing([[card(12, 'hearts'), card(12, 'spades'), card(3)], [card(4)]]);
+    expect(legalPlays(opening, 'p0')).toEqual([
+      ['3-clubs'],
+      ['12-hearts'],
+      ['12-spades'],
+      ['12-hearts', '12-spades'],
+    ]);
   });
 
   it('décrit l’échange attendu du destinataire', () => {

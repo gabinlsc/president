@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref, shallowRef } from 'vue';
 import type {
+  Card,
   CardId,
   CreateRoomInput,
   GameEvent,
@@ -25,6 +26,14 @@ export interface ClearedTrick {
   readonly reason: TrickClearReason;
 }
 
+/** What a seat just did, shown briefly next to it so every move is attributed. */
+export interface SeatAction {
+  readonly id: number;
+  readonly kind: 'play' | 'cut' | 'pass' | 'out';
+  readonly cards: readonly Card[];
+}
+export const SEAT_ACTION_MS = 1800;
+
 export interface LogLine {
   readonly id: number;
   readonly text: string;
@@ -47,6 +56,8 @@ export const useGameStore = defineStore('game', () => {
   const cleared = shallowRef<ClearedTrick | null>(null);
   const log = ref<LogLine[]>([]);
   let sequence = 0;
+  const seatActions = ref<Record<PlayerId, SeatAction>>({});
+  const seatTimers = new Map<PlayerId, ReturnType<typeof setTimeout>>();
   let clearTimer: ReturnType<typeof setTimeout> | undefined;
   let noticeTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -69,6 +80,7 @@ export const useGameStore = defineStore('game', () => {
   /** Any legal play while it is not our turn is, by construction, a square cut. */
   const isCut = computed(() => canPlay.value && !isMyTurn.value);
   const canPass = computed(() => !!game.value?.canPass);
+  const autoCut = computed(() => !!snapshot.value?.autoCut);
   const canExchange = computed(() => {
     const exchange = game.value?.exchange;
     return (
@@ -101,6 +113,12 @@ export const useGameStore = defineStore('game', () => {
     if (previous && previous.code === next.code && next.version <= previous.version) return;
     if (previous?.code !== next.code) log.value = [];
     record(next.events, next);
+    for (const event of next.events) {
+      if (event.type === 'played')
+        flash(event.playerId, { kind: event.outOfTurn ? 'cut' : 'play', cards: event.cards });
+      else if (event.type === 'passed') flash(event.playerId, { kind: 'pass', cards: [] });
+      else if (event.type === 'playerFinished') flash(event.playerId, { kind: 'out', cards: [] });
+    }
     const clear = next.events.find((e) => e.type === 'trickCleared');
     if (clear?.type === 'trickCleared') {
       cleared.value = { id: ++sequence, plays: clear.plays, reason: clear.reason };
@@ -144,6 +162,23 @@ export const useGameStore = defineStore('game', () => {
   const start = () => run(() => call('room:start'));
   const nextRound = () => run(() => call('game:next'));
   const pass = () => run(() => call('game:pass'));
+  const setAutoCut = (enabled: boolean) => run(() => call('game:autoCut', { enabled }));
+
+  function flash(playerId: PlayerId, action: Omit<SeatAction, 'id'>): void {
+    const previous = seatActions.value[playerId];
+    // A finish keeps the cards of the play that led to it visible.
+    const cards = action.kind === 'out' && previous ? previous.cards : action.cards;
+    seatActions.value = { ...seatActions.value, [playerId]: { ...action, cards, id: ++sequence } };
+    clearTimeout(seatTimers.get(playerId));
+    seatTimers.set(
+      playerId,
+      setTimeout(() => {
+        const rest = { ...seatActions.value };
+        delete rest[playerId];
+        seatActions.value = rest;
+      }, SEAT_ACTION_MS),
+    );
+  }
 
   async function play(): Promise<void> {
     const move = selectedMove.value;
@@ -206,6 +241,9 @@ export const useGameStore = defineStore('game', () => {
     notice,
     selected,
     cleared,
+    seatActions,
+    autoCut,
+    setAutoCut,
     log,
     selfId,
     self,

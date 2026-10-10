@@ -24,7 +24,7 @@ const memberOf = (id: string) => store.snapshot?.members.find((m) => m.id === id
       <TransitionGroup
         name="fade"
         tag="div"
-        class="flex flex-wrap justify-center gap-3"
+        class="flex flex-wrap justify-center gap-x-3 gap-y-4 pt-2"
         aria-label="Adversaires"
       >
         <PlayerSeat
@@ -33,6 +33,7 @@ const memberOf = (id: string) => store.snapshot?.members.find((m) => m.id === id
           :seat="seat"
           :member="memberOf(seat.id)"
           :active="game.phase === 'playing' && game.turn === seat.id"
+          :action="store.seatActions[seat.id]"
         />
       </TransitionGroup>
       <TrickPile />

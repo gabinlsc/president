@@ -14,7 +14,7 @@ première manche.
 ## Cartes et plis
 
 - 52 cartes, toutes distribuées. Ordre : 3 < 4 < … < 10 < V < D < R < As < 2.
-- La Dame de cœur débute la première manche : la première pose doit la contenir.
+- Le détenteur de la Dame de cœur débute la première manche, avec la carte de son choix.
 - Un pli se lance en simples, paires ou triples ; il se poursuit dans ce format, à valeur
   égale ou supérieure. Un carré ne s'ouvre pas.
 - **Même carte** : poser la même valeur que la pose précédente oblige le joueur suivant à
@@ -27,7 +27,9 @@ première manche.
   posée dans une paire ou un triple.
 - **Couper** : compléter un carré avec les cartes de même valeur posées consécutivement sur
   la table, même hors tour (y compris après avoir passé). La table est nettoyée et le coupeur
-  relance. Interdit si le pli a commencé en triples.
+  relance. Interdit si le pli a commencé en triples, ou si le coupeur a lui-même posé les
+  dernières cartes de la série. Option « Coupe auto » : le serveur coupe pour le joueur dès
+  que c'est possible, avant les bots.
 - Quand tous les autres joueurs encore en jeu ont passé, le dernier poseur relance ; s'il
   est sorti, c'est le joueur actif suivant.
 

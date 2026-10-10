@@ -104,7 +104,6 @@ function beginPlay(base: { round: number; seats: readonly PlayerState[] }): Play
     passed: [],
     finished: [],
     penalized: [],
-    mustOpenWith: firstRound ? QUEEN_OF_HEARTS : null,
   };
 }
 

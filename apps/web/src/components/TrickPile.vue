@@ -77,6 +77,13 @@ const CLEAR_LABELS = {
             }"
           >
             <PlayingCard v-for="card in play.cards" :key="card.id" :card="card" />
+            <span
+              v-if="i === visiblePlays.length - 1"
+              class="absolute -top-7 left-1/2 -translate-x-1/2 rounded-full bg-moss px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-white shadow"
+              data-testid="trick-author"
+            >
+              {{ play.playerId === store.selfId ? 'Vous' : store.nameOf(play.playerId) }}
+            </span>
           </div>
         </TransitionGroup>
         <p class="text-center text-sm text-ink-soft" aria-live="polite">

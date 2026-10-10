@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ArrowRight, Gift, Scissors } from '@lucide/vue';
+import { ArrowRight, Gift, Scissors, Zap } from '@lucide/vue';
 import { rankLabel } from '@president/shared';
 import { useGameStore } from '../stores/game';
 import { roleLabel } from '../lib/describe';
@@ -32,7 +32,6 @@ const hint = computed(() => {
     return g.legalPlays.length
       ? 'Vous pouvez couper : complétez le carré, même hors tour !'
       : `Au tour de ${store.nameOf(g.turn)}.`;
-  if (g.mustOpenWith) return 'Ouvrez avec la Dame de cœur.';
   if (!g.trick) return 'La table est à vous : ouvrez le pli.';
   if (g.trick.sameRankRequired)
     return `Même carte obligatoire : un ${rankLabel(g.trick.rank)}, ou passez.`;
@@ -51,7 +50,11 @@ const turnLabel = computed(() => {
 </script>
 
 <template>
-  <section class="glass-strong rounded-[2rem] p-4 sm:p-5" aria-label="Votre main">
+  <section
+    class="glass-strong rounded-[2rem] p-4 transition sm:p-5"
+    :class="store.isMyTurn ? 'hand-active' : ''"
+    aria-label="Votre main"
+  >
     <header class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <span class="grid size-10 place-items-center rounded-full bg-moss font-semibold text-white">
@@ -78,6 +81,15 @@ const turnLabel = computed(() => {
       >
     </header>
 
+    <Transition name="fade">
+      <p
+        v-if="store.isMyTurn"
+        class="mt-3 rounded-2xl bg-moss px-4 py-2 text-center text-sm font-semibold text-white shadow"
+        role="status"
+      >
+        À vous de jouer !
+      </p>
+    </Transition>
     <div class="-mx-4 mt-3 overflow-x-auto px-4 pt-5 pb-2 sm:-mx-5 sm:px-5">
       <div
         :key="`round-${game.round}`"
@@ -110,7 +122,19 @@ const turnLabel = computed(() => {
           Effacer
         </button>
       </p>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-if="game.phase === 'playing' && store.self?.status !== 'finished'"
+          type="button"
+          class="btn min-h-11 border px-4"
+          :class="store.autoCut ? 'border-gold bg-gold text-white' : 'glass text-ink'"
+          :aria-pressed="store.autoCut"
+          title="Le serveur coupe pour vous dès qu’un carré est possible (jamais sur vos propres cartes)."
+          :disabled="store.pending || !store.connected"
+          @click="store.setAutoCut(!store.autoCut)"
+        >
+          <Zap :size="15" /> Coupe auto
+        </button>
         <template v-if="game.phase === 'exchanging'">
           <button
             v-if="game.exchange && !game.exchange.forced && !game.exchange.submitted"
