@@ -6,8 +6,6 @@ export interface Member {
   isBot: boolean;
   connected: boolean;
   socketId: string | null;
-  /** Cut automatically, out of turn, as soon as a square is possible. */
-  autoCut: boolean;
   /** Opaque reconnection secret; `null` once revoked (left the room or bot). */
   token: string | null;
 }

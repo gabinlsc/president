@@ -25,11 +25,12 @@ première manche.
   la table est nettoyée et son auteur relance.
 - **Dame de pique** : inverse immédiatement le sens de rotation (`isReversed`), y compris
   posée dans une paire ou un triple.
-- **Couper** : compléter un carré avec les cartes de même valeur posées consécutivement sur
-  la table, même hors tour (y compris après avoir passé). La table est nettoyée et le coupeur
-  relance. Interdit si le pli a commencé en triples, ou si le coupeur a lui-même posé les
-  dernières cartes de la série. Option « Coupe auto » : le serveur coupe pour le joueur dès
-  que c'est possible, avant les bots.
+- **Couper** : compléter un carré hors tour (y compris après avoir passé) avec **autant de
+  cartes que le format du pli** et les cartes de même valeur posées consécutivement. Ex. : 4,
+  puis 4 : le joueur suivant qui tient deux 4 ne peut en poser qu'un, et ne peut pas couper sur
+  sa propre carte ; un autre joueur peut alors couper avec le dernier 4. La table est nettoyée
+  et le coupeur relance. Interdit si le pli a commencé en triples. Dans l'interface, le bouton
+  « Couper » s'allume dès qu'une coupe est possible et coupe en un clic.
 - Quand tous les autres joueurs encore en jeu ont passé, le dernier poseur relance ; s'il
   est sorti, c'est le joueur actif suivant.
 
