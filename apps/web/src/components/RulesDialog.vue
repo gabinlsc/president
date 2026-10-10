@@ -4,7 +4,10 @@ defineEmits<{ close: [] }>();
 
 const rules: readonly [string, string][] = [
   ['Valeurs', '3 < 4 < … < 10 < Valet < Dame < Roi < As < 2. 52 cartes, toutes distribuées.'],
-  ['Ouverture', 'La Dame de cœur débute la première manche. Ensuite, le Trou du cul ouvre.'],
+  [
+    'Ouverture',
+    'Le détenteur de la Dame de cœur débute la première manche, avec la carte de son choix. Ensuite, le Trou du cul ouvre.',
+  ],
   [
     'Format',
     'Un pli lancé en simples, paires ou triples se joue dans ce format, à valeur égale ou supérieure.',
@@ -17,7 +20,7 @@ const rules: readonly [string, string][] = [
   ['Dame de pique', 'Elle inverse immédiatement le sens de rotation.'],
   [
     'Couper',
-    'Compléter un carré sur la table se fait même hors tour et nettoie la table. Jamais sur un pli lancé en triples.',
+    'Compléter un carré sur la table se fait même hors tour et nettoie la table. Jamais sur un pli lancé en triples, ni sur ses propres cartes. Le bouton « Coupe auto » coupe pour vous dès que c’est possible.',
   ],
   [
     'Sorties',
