@@ -40,26 +40,23 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    class="fixed inset-0 z-50 grid place-items-center bg-black/45 p-4 backdrop-blur-md"
-    @click.self="emit('close')"
-  >
+  <div class="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" @click.self="emit('close')">
     <section
       ref="panel"
       role="dialog"
       aria-modal="true"
       :aria-label="title"
-      class="glass-strong relative max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-3xl p-6 sm:p-8"
+      class="panel-lg relative max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-3xl bg-cream p-6 sm:p-8"
     >
       <button
         type="button"
-        class="absolute top-4 right-4 grid size-9 place-items-center rounded-full text-ink-soft transition hover:bg-surface"
+        class="btn absolute top-4 right-4 size-9 min-h-0 px-0"
         aria-label="Fermer"
         @click="emit('close')"
       >
-        <X :size="18" />
+        <X :size="18" :stroke-width="2.8" />
       </button>
-      <h2 class="pr-10 font-display text-2xl">{{ title }}</h2>
+      <h2 class="pr-12 font-display text-2xl font-bold">{{ title }}</h2>
       <div class="mt-5"><slot /></div>
     </section>
   </div>

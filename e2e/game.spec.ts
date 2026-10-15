@@ -122,9 +122,10 @@ test('solo complet, classement, échanges puis manche suivante', async ({ page }
   await expect(page.locator('[data-testid^=seat-]')).toHaveCount(5);
   const results = page.getByTestId('results');
   for (let step = 0; step < 800 && !(await results.isVisible()); step++) {
+    // Short timeout: the turn badge disappears when the results replace the table.
     const mine = await page
       .getByTestId('turn')
-      .getAttribute('data-mine')
+      .getAttribute('data-mine', { timeout: 1000 })
       .catch(() => null);
     if (mine === 'true') await playOnce(page);
     else await page.waitForTimeout(40);

@@ -81,17 +81,18 @@ provide(SEAT_OFFSET, (id: PlayerId | null) => {
         >
           <!-- Direction of play, drawn on the cloth -->
           <div
-            class="pointer-events-none absolute inset-[18%] rounded-[50%] border border-dashed border-champagne/10"
+            class="pointer-events-none absolute inset-[18%] rounded-[50%] border-3 border-dotted border-ink/15"
             aria-hidden="true"
           />
           <div
-            class="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 text-[0.68rem] font-semibold tracking-[0.2em] whitespace-nowrap text-champagne/70 uppercase md:bottom-[11%]"
+            class="pill absolute bottom-5 left-1/2 z-10 -translate-x-1/2 gap-2 bg-paper shadow-sm md:bottom-[9%]"
             data-testid="direction"
           >
             <span>Manche {{ game.round }}</span>
-            <span class="size-1 rounded-full bg-champagne/40" />
+            <span class="size-1.5 rounded-full bg-ink" />
             <RotateCw
               :size="13"
+              :stroke-width="2.6"
               class="transition-transform duration-700"
               :class="game.isReversed ? '-scale-x-100' : ''"
             />

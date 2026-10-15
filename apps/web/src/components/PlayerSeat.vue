@@ -30,7 +30,7 @@ const dimmed = computed(
 <template>
   <div
     class="relative flex w-32 flex-col items-center transition duration-500"
-    :class="dimmed ? 'opacity-50' : ''"
+    :class="dimmed ? 'opacity-55 grayscale' : ''"
   >
     <!-- Hidden hand -->
     <div class="relative mb-[-0.9rem] flex h-11 items-end justify-center" aria-hidden="true">
@@ -47,8 +47,8 @@ const dimmed = computed(
     </div>
 
     <div
-      class="glass relative z-10 flex w-full flex-col items-center rounded-2xl px-2 pt-2 pb-2.5 text-center transition duration-300"
-      :class="active ? 'seat-active scale-105' : ''"
+      class="panel relative z-10 flex w-full flex-col items-center rounded-2xl px-2 pt-2.5 pb-3 text-center transition duration-300 ease-(--ease-spring)"
+      :class="active ? 'seat-active' : ''"
       :data-testid="`seat-${seat.id}`"
       :data-cards="seat.cardCount"
       :aria-current="active ? 'true' : undefined"
@@ -56,35 +56,38 @@ const dimmed = computed(
       <span class="relative grid size-11 place-items-center rounded-full">
         <span v-if="active" class="turn-ring" aria-hidden="true" />
         <span
-          class="grid size-11 place-items-center rounded-full font-display text-lg transition-colors duration-300"
-          :class="active ? 'bg-gold text-[#1d1608]' : 'bg-moss-soft text-moss'"
+          class="grid size-11 place-items-center rounded-full border-3 border-ink font-display text-lg font-bold transition-colors duration-300"
+          :class="active ? 'bg-paper' : 'bg-sky'"
         >
           {{ seat.name.slice(0, 1).toUpperCase() }}
         </span>
         <span
           v-if="member?.isBot || !member?.connected"
-          class="absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full bg-surface text-ink-soft shadow"
+          class="absolute -right-1.5 -bottom-1 grid size-5 place-items-center rounded-full border-2 border-ink bg-lilac"
           :title="member?.isBot ? 'Bot' : 'Déconnecté : un bot joue à sa place'"
         >
-          <Bot v-if="member?.isBot" :size="12" />
+          <Bot v-if="member?.isBot" :size="11" :stroke-width="2.6" />
           <WifiOff v-else :size="11" />
         </span>
         <Crown
           v-if="seat.role === 'president'"
-          :size="18"
-          class="absolute -top-3.5 left-1/2 -translate-x-1/2 text-gold drop-shadow"
+          :size="20"
+          :stroke-width="2.4"
+          class="absolute -top-4 left-1/2 -translate-x-1/2 -rotate-12 fill-banana text-ink"
         />
       </span>
-      <strong class="mt-1.5 max-w-full truncate text-sm">{{ seat.name }}</strong>
-      <span class="text-[0.7rem] text-ink-soft">{{ status }}</span>
+      <strong class="mt-1.5 max-w-full truncate font-display text-[0.95rem] font-bold">{{
+        seat.name
+      }}</strong>
+      <span class="text-[0.72rem] font-medium text-ink-soft">{{ status }}</span>
       <span
         v-if="seat.role !== 'neutral'"
-        class="mt-1 rounded-full bg-gold/12 px-2 py-px text-[0.62rem] font-medium text-gold"
+        class="mt-1 rounded-full border-2 border-ink bg-lilac px-2 py-px font-display text-[0.62rem] font-semibold"
         >{{ roleLabel(seat.role) }}</span
       >
       <span
         v-if="active"
-        class="absolute -bottom-2.5 flex items-center gap-1 rounded-full bg-gold px-2.5 py-0.5 text-[0.62rem] font-semibold whitespace-nowrap text-[#1d1608] shadow"
+        class="pill absolute -bottom-3 rotate-2 bg-paper text-[0.65rem] shadow-sm"
       >
         À son tour <span class="thinking-dots" aria-hidden="true"><i /><i /><i /></span>
       </span>
@@ -103,11 +106,11 @@ const dimmed = computed(
           <PlayingCard v-for="card in action.cards" :key="card.id" :card="card" size="sm" />
         </div>
         <span
-          class="mt-1 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold shadow-lg"
+          class="pill mt-1 -rotate-3 shadow-sm"
           :class="{
-            'bg-surface text-ink': action.kind === 'play',
-            'bg-gold text-[#1d1608]': action.kind === 'cut' || action.kind === 'out',
-            'bg-ink-soft text-sand': action.kind === 'pass',
+            'bg-paper': action.kind === 'play',
+            'bg-banana': action.kind === 'cut' || action.kind === 'out',
+            'bg-muted': action.kind === 'pass',
           }"
         >
           <Scissors v-if="action.kind === 'cut'" :size="12" />

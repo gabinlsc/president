@@ -69,42 +69,39 @@ const CLEAR_LABELS = {
             v-for="(play, i) in visiblePlays"
             :key="play.cards.map((c) => c.id).join('+')"
             class="fly-in absolute flex -space-x-9"
-            :class="i < visiblePlays.length - 1 ? 'brightness-[0.7]' : 'z-10'"
+            :class="i < visiblePlays.length - 1 ? 'brightness-[0.92]' : 'z-10'"
             :style="flyFrom(play)"
           >
             <PlayingCard v-for="card in play.cards" :key="card.id" :card="card" />
             <span
               v-if="i === visiblePlays.length - 1"
-              class="absolute -top-7 left-1/2 -translate-x-1/2 rounded-full bg-gold px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[#1d1608] shadow-lg"
+              class="pill absolute -top-8 left-1/2 -translate-x-1/2 -rotate-3 bg-banana shadow-sm"
               data-testid="trick-author"
             >
               {{ play.playerId === store.selfId ? 'Vous' : store.nameOf(play.playerId) }}
             </span>
           </div>
         </div>
-        <p class="mt-2 min-h-6 text-center text-sm text-champagne/80">
-          <strong v-if="pile.cleared" class="font-display text-lg text-champagne">{{
-            CLEAR_LABELS[pile.cleared]
-          }}</strong>
+        <p class="mt-2 min-h-6 text-center text-sm font-semibold">
+          <strong
+            v-if="pile.cleared"
+            class="inline-block -rotate-2 rounded-xl border-3 border-ink bg-banana px-3 py-0.5 font-display text-lg shadow-sm"
+            >{{ CLEAR_LABELS[pile.cleared] }}</strong
+          >
           <template v-else-if="game.trick">
             {{ FORMAT_LABELS[game.trick.format] }}
-            <strong
-              v-if="game.trick.sameRankRequired"
-              class="ml-1 rounded-full bg-gold/20 px-2 py-0.5 text-champagne"
-            >
+            <strong v-if="game.trick.sameRankRequired" class="pill ml-1 bg-coral">
               Même carte ou passe
             </strong>
           </template>
         </p>
       </div>
-      <div
-        v-else
-        key="empty"
-        class="flex flex-col items-center gap-1 text-center text-champagne/75"
-      >
-        <span class="font-display text-4xl text-champagne/40" aria-hidden="true">♠ ♥ ♦ ♣</span>
-        <p class="font-display text-xl text-champagne">Un nouveau pli</p>
-        <p class="text-sm">
+      <div v-else key="empty" class="flex flex-col items-center gap-1 text-center">
+        <span class="font-display text-4xl tracking-widest text-ink/25" aria-hidden="true"
+          >♠♥♦♣</span
+        >
+        <p class="font-display text-2xl font-bold">Un nouveau pli</p>
+        <p class="text-sm font-medium">
           {{ store.isMyTurn ? 'À vous de l’ouvrir.' : `${store.nameOf(game.turn)} ouvre le pli.` }}
         </p>
       </div>
