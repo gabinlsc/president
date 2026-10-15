@@ -243,7 +243,45 @@ export class RoomService {
     room.touchedAt = Date.now();
     for (const member of room.members.values())
       if (member.socketId) this.publish(member.socketId, this.snapshot(room, member.id));
+    if (events.some((e) => e.type === 'roundOver')) this.record(room);
     this.schedule(room);
+  }
+
+  /**
+   * Reports a finished round for the leaderboard. A human who left (now a bot) or who is
+   * disconnected was played automatically, so only connected humans are credited.
+   */
+  private record(room: Room): void {
+    const { game } = room;
+    if (!this.options.results || game.phase !== 'roundOver') return;
+    const players = game.ranking.flatMap((id, i) => {
+      const member = room.members.get(id);
+      const seat = game.seats.find((s) => s.id === id);
+      if (!member || !seat || (!member.isBot && !member.connected)) return [];
+      return [
+        {
+          name: member.name,
+          bot: member.isBot,
+          rank: i + 1,
+          won: i === 0,
+          role: seat.role,
+          penalized: game.penalized.includes(id),
+        },
+      ];
+    });
+    if (!players.some((p) => !p.bot)) return;
+    try {
+      this.options.results({
+        v: 1,
+        t: Math.floor(Date.now() / 1000),
+        game: 'president',
+        mode: room.mode,
+        round: game.round,
+        players,
+      });
+    } catch (e) {
+      console.error('[président] enregistrement du résultat impossible', e);
+    }
   }
 
   private remove(room: Room): void {

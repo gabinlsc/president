@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RoomSnapshot } from '@president/shared';
 import { resolveOptions } from '../../apps/server/src/config';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileResultSink, type RoundRecord } from '../../apps/server/src/results';
 import { RoomService } from '../../apps/server/src/rooms/RoomService';
 import { card, playing } from '../game/helpers';
 
@@ -144,5 +148,105 @@ describe('RoomService', () => {
     rooms.play(room, human, ['6-spades']);
     expect(room.game.phase === 'playing' && room.game.trick).toBeNull();
     rooms.close();
+  });
+});
+
+describe('Classement : une ligne par manche terminée', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** Solo à 5 : l'humain a un as seul et finit premier, les bots finissent la manche. */
+  function nearEnd(onRecord: (r: RoundRecord) => void) {
+    let seed = 1;
+    const rooms = new RoomService(
+      resolveOptions({ pacing: PACING, seed: () => seed++, results: onRecord }),
+      () => {},
+    );
+    const session = rooms.create({ name: 'Moi', mode: 'solo', bots: 4 }, 's0');
+    const room = rooms.store.get(session.code)!;
+    const ids = [...room.members.keys()];
+    const crafted = playing([[card(14)], [card(3)], [card(4), card(5)], [card(6)], [card(7)]]);
+    room.game = {
+      ...crafted,
+      seats: crafted.seats.map((s, i) => ({ ...s, id: ids[i]! })),
+      turn: ids[0]!,
+    };
+    return { rooms, room, human: room.members.get(ids[0]!)! };
+  }
+
+  it('enregistre le classement avec les rôles, une seule fois', () => {
+    const records: RoundRecord[] = [];
+    const { rooms, room, human } = nearEnd((r) => records.push(r));
+    rooms.play(room, human, ['14-clubs']);
+    for (let i = 0; i < 200 && room.game.phase !== 'roundOver'; i++) vi.advanceTimersByTime(1000);
+    expect(room.game.phase).toBe('roundOver');
+    vi.advanceTimersByTime(10_000);
+
+    expect(records).toHaveLength(1);
+    const [record] = records;
+    expect(record).toMatchObject({ v: 1, game: 'president', mode: 'solo', round: 1 });
+    expect(record!.players.map((p) => p.rank)).toEqual([1, 2, 3, 4, 5]);
+    expect(record!.players[0]).toMatchObject({
+      name: 'Moi',
+      bot: false,
+      won: true,
+      role: 'president',
+    });
+    expect(record!.players.at(-1)).toMatchObject({ bot: true, won: false, role: 'trouduc' });
+    expect(record!.players.filter((p) => p.won)).toHaveLength(1);
+  });
+
+  it('ne compte pas un humain déconnecté (joué par le serveur)', () => {
+    const records: RoundRecord[] = [];
+    const { rooms, room, human } = nearEnd((r) => records.push(r));
+    rooms.play(room, human, ['14-clubs']);
+    // « Moi » se déconnecte ; un autre humain, connecté, garde la table en vie et joue lui-même.
+    human.connected = false;
+    const otherId = [...room.members.keys()][1]!;
+    const other = room.members.get(otherId)!;
+    other.isBot = false;
+    other.connected = true;
+    for (let i = 0; i < 200 && room.game.phase !== 'roundOver'; i++) {
+      const game = room.game;
+      if (game.phase === 'playing' && game.turn === otherId) {
+        const hand = game.seats.find((s) => s.id === otherId)!.hand;
+        try {
+          rooms.play(room, other, [hand[0]!.id]);
+        } catch {
+          rooms.pass(room, other);
+        }
+      } else vi.advanceTimersByTime(1000);
+    }
+    expect(room.game.phase).toBe('roundOver');
+    expect(records).toHaveLength(1);
+    const names = records[0]!.players.map((p) => p.name);
+    expect(names).not.toContain('Moi');
+    expect(records[0]!.players.find((p) => !p.bot)?.name).toBe(other.name);
+  });
+});
+
+describe('fileResultSink', () => {
+  it('ajoute une ligne JSON par manche, dans l’ordre', async () => {
+    const file = join(await mkdtemp(join(tmpdir(), 'president-')), 'results.jsonl');
+    const sink = fileResultSink(file);
+    for (const round of [1, 2, 3])
+      sink({ v: 1, t: round, game: 'president', mode: 'online', round, players: [] });
+    await new Promise((r) => setTimeout(r, 50));
+    const lines = (await readFile(file, 'utf8')).trim().split('\n');
+    expect(lines.map((l) => (JSON.parse(l) as RoundRecord).round)).toEqual([1, 2, 3]);
+  });
+
+  it('journalise une erreur d’écriture sans la propager', async () => {
+    const log = vi.fn();
+    const sink = fileResultSink('/dossier-absent/results.jsonl', log);
+    expect(() =>
+      sink({ v: 1, t: 1, game: 'president', mode: 'solo', round: 1, players: [] }),
+    ).not.toThrow();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('non enregistré'));
   });
 });

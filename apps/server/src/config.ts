@@ -1,4 +1,6 @@
 import { randomInt } from 'node:crypto';
+import { resolve } from 'node:path';
+import { fileResultSink, type ResultSink } from './results';
 
 export interface Pacing {
   /** Time given to clients to animate a deal before play or exchanges begin. */
@@ -17,6 +19,8 @@ export interface ServerOptions {
   readonly seed: () => number;
   /** Rooms without any connected human are removed after this idle time. */
   readonly roomTtl: number;
+  /** Receives every finished round (leaderboard of games.glsc.fr); from RESULTS_FILE. */
+  readonly results: ResultSink | null;
 }
 
 const DEFAULT_ORIGINS =
@@ -41,6 +45,7 @@ export function resolveOptions(overrides: Partial<ServerOptions> = {}): ServerOp
     },
     seed: () => randomInt(0, 2 ** 32),
     roomTtl: 30 * 60 * 1000,
+    results: env.RESULTS_FILE ? fileResultSink(resolve(env.RESULTS_FILE)) : null,
     ...overrides,
   };
 }
