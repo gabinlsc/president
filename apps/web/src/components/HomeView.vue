@@ -6,6 +6,7 @@ import { useGameStore } from '../stores/game';
 import { storage } from '../lib/storage';
 import ModalDialog from './ModalDialog.vue';
 import PlayingCard from './PlayingCard.vue';
+import DecorShapes from './DecorShapes.vue';
 
 const store = useGameStore();
 const bots = ref(MIN_SOLO_BOTS);
@@ -18,6 +19,8 @@ const showcase: Card[] = [
   { id: '12-hearts', rank: 12, suit: 'hearts' },
   { id: '15-spades', rank: 15, suit: 'spades' },
 ];
+/** Sticker colours for the bots around the solo table. */
+const BOT_COLORS = ['bg-sky', 'bg-lilac', 'bg-peach', 'bg-mint', 'bg-coral', 'bg-banana', 'bg-sky'];
 const disabled = computed(() => !store.connected || store.pending);
 const titles = {
   solo: 'Une partie en solo',
@@ -41,24 +44,28 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <main class="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
-    <section class="grid grid-cols-1 items-center gap-10 py-10 md:grid-cols-[1.1fr_1fr] md:py-16">
+  <main class="relative mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6">
+    <DecorShapes />
+    <section
+      class="relative grid grid-cols-1 items-center gap-10 py-8 md:grid-cols-[1.1fr_1fr] md:py-14"
+    >
       <div>
-        <p class="eyebrow">Le grand classique, rebattu</p>
-        <h1 class="mt-4 font-display text-4xl leading-[1.05] sm:text-6xl">
+        <p class="pill -rotate-2 bg-sky shadow-sm">♠ Jeu de cartes · 2 à 8 joueurs</p>
+        <h1 class="mt-5 font-display text-5xl leading-[1.02] font-bold sm:text-7xl">
           Une bonne main.<br />Une
-          <em class="bg-gradient-to-r from-champagne to-gold bg-clip-text pr-1 text-transparent"
-            >meilleure</em
+          <span
+            class="inline-block -rotate-2 rounded-xl border-3 border-ink bg-banana px-2 shadow-md"
+            >meilleure</span
           >
           compagnie.
         </h1>
-        <p class="mt-5 max-w-md text-ink-soft">
+        <p class="mt-6 max-w-md text-lg text-ink-soft">
           Le Président en temps réel : entre amis avec un code de table, ou face à des bots qui
           prennent le temps de réfléchir.
         </p>
       </div>
       <div
-        class="felt relative mx-auto grid h-72 w-full max-w-md place-items-center rounded-[50%] sm:h-80"
+        class="felt relative mx-auto grid h-72 w-full max-w-md rotate-1 place-items-center rounded-[50%] sm:h-80"
         aria-hidden="true"
       >
         <div class="relative h-40 w-64">
@@ -76,86 +83,121 @@ async function submit(): Promise<void> {
             <PlayingCard :card="card" size="lg" />
           </span>
         </div>
-        <span class="absolute bottom-8 text-xs tracking-[0.2em] text-champagne/70 uppercase"
+        <span class="pill absolute bottom-7 rotate-2 bg-paper shadow-sm"
           >52 cartes · une seule présidence</span
         >
       </div>
     </section>
 
-    <section aria-labelledby="choose-title">
-      <h2 id="choose-title" class="font-display text-2xl sm:text-3xl">On se fait une partie ?</h2>
-      <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <article class="glass flex min-w-0 flex-col gap-5 rounded-3xl p-6">
-          <div class="flex items-center justify-between">
-            <span class="grid size-11 place-items-center rounded-2xl bg-moss-soft text-moss"
-              ><Bot :size="22"
+    <section aria-labelledby="choose-title" class="relative">
+      <h2 id="choose-title" class="font-display text-3xl font-bold sm:text-4xl">
+        On se fait une partie ?
+      </h2>
+      <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <article
+          class="panel-lg flex min-w-0 flex-col gap-5 rounded-3xl p-6 transition-transform duration-200 ease-(--ease-spring) md:-rotate-1 md:hover:rotate-0"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="grid size-12 -rotate-6 place-items-center rounded-2xl border-3 border-ink bg-mint shadow-sm"
+              ><Bot :size="24" :stroke-width="2.4"
             /></span>
             <span class="eyebrow">À votre rythme</span>
           </div>
           <div>
-            <h3 class="font-display text-2xl">En solo</h3>
-            <p class="mt-1 text-sm text-ink-soft">
+            <h3 class="font-display text-3xl font-bold">En solo</h3>
+            <p class="mt-1 text-ink-soft">
               Des bots patients qui coupent, inversent et gardent leurs 2.
             </p>
           </div>
-          <div
-            class="flex items-center justify-between rounded-2xl bg-surface/60 px-4 py-2.5 text-sm"
-          >
-            <span>Adversaires bots</span>
-            <div class="flex items-center gap-3">
-              <button
-                type="button"
-                class="grid size-8 place-items-center rounded-full bg-surface shadow-sm disabled:opacity-40"
-                aria-label="Un bot de moins"
-                :disabled="bots <= MIN_SOLO_BOTS"
-                @click="bots--"
-              >
-                <Minus :size="14" />
-              </button>
-              <output class="w-4 text-center font-semibold" aria-live="polite">{{ bots }}</output>
-              <button
-                type="button"
-                class="grid size-8 place-items-center rounded-full bg-surface shadow-sm disabled:opacity-40"
-                aria-label="Un bot de plus"
-                :disabled="bots >= MAX_SOLO_BOTS"
-                @click="bots++"
-              >
-                <Plus :size="14" />
-              </button>
+          <div class="rounded-2xl border-3 border-ink bg-mint-soft p-4">
+            <div class="flex items-center justify-between gap-3">
+              <span class="font-display font-semibold">Adversaires bots</span>
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  class="btn size-9 min-h-0 px-0"
+                  aria-label="Un bot de moins"
+                  :disabled="bots <= MIN_SOLO_BOTS"
+                  @click="bots--"
+                >
+                  <Minus :size="16" :stroke-width="3" />
+                </button>
+                <output
+                  class="w-6 text-center font-display text-2xl font-bold"
+                  aria-live="polite"
+                  >{{ bots }}</output
+                >
+                <button
+                  type="button"
+                  class="btn size-9 min-h-0 px-0"
+                  aria-label="Un bot de plus"
+                  :disabled="bots >= MAX_SOLO_BOTS"
+                  @click="bots++"
+                >
+                  <Plus :size="16" :stroke-width="3" />
+                </button>
+              </div>
             </div>
+            <ul class="mt-3 flex flex-wrap gap-1.5" aria-hidden="true">
+              <li
+                v-for="i in MAX_SOLO_BOTS"
+                :key="i"
+                class="grid size-8 place-items-center rounded-lg border-2 transition-all duration-200 ease-(--ease-spring)"
+                :class="
+                  i <= bots
+                    ? [BOT_COLORS[i - 1], 'border-ink shadow-sm', i % 2 ? '-rotate-6' : 'rotate-6']
+                    : 'scale-90 border-dashed border-ink/30'
+                "
+              >
+                <Bot v-if="i <= bots" :size="16" :stroke-width="2.4" />
+              </li>
+            </ul>
+            <p class="mt-2 text-xs font-medium text-ink-soft">
+              {{ bots + 1 }} joueurs autour de la table, vous compris.
+            </p>
           </div>
           <button
             type="button"
-            class="btn-gold mt-auto"
+            class="btn-primary mt-auto"
             :disabled="disabled"
             @click="intent = 'solo'"
           >
-            Jouer en solo <ArrowRight :size="17" />
+            Jouer en solo <ArrowRight :size="18" :stroke-width="2.6" />
           </button>
         </article>
 
-        <article class="glass flex min-w-0 flex-col gap-5 rounded-3xl p-6">
-          <div class="flex items-center justify-between">
-            <span class="grid size-11 place-items-center rounded-2xl bg-blush text-heart"
-              ><Users :size="22"
+        <article
+          class="panel-lg flex min-w-0 flex-col gap-5 rounded-3xl p-6 transition-transform duration-200 ease-(--ease-spring) md:rotate-1 md:hover:rotate-0"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <span
+              class="grid size-12 rotate-6 place-items-center rounded-2xl border-3 border-ink bg-coral shadow-sm"
+              ><Users :size="24" :stroke-width="2.4"
             /></span>
             <span class="eyebrow">De 2 à 8 joueurs</span>
           </div>
           <div>
-            <h3 class="font-display text-2xl">Entre amis</h3>
-            <p class="mt-1 text-sm text-ink-soft">
+            <h3 class="font-display text-3xl font-bold">Entre amis</h3>
+            <p class="mt-1 text-ink-soft">
               Une table privée, un code à quatre caractères à partager.
             </p>
           </div>
-          <button type="button" class="btn-ghost" :disabled="disabled" @click="intent = 'online'">
-            Créer une table <Plus :size="17" />
+          <button type="button" class="btn-go" :disabled="disabled" @click="intent = 'online'">
+            Créer une table <Plus :size="18" :stroke-width="2.6" />
           </button>
+          <div
+            class="flex items-center gap-3 text-xs font-semibold text-ink-soft"
+            aria-hidden="true"
+          >
+            <span class="h-0.5 flex-1 bg-ink/15" /> ou <span class="h-0.5 flex-1 bg-ink/15" />
+          </div>
           <form class="mt-auto flex gap-2" @submit.prevent="intent = 'join'">
             <label class="sr-only" for="room-code">Code du salon</label>
             <input
               id="room-code"
               v-model="code"
-              class="min-w-0 flex-1 rounded-full border border-surface/80 bg-surface/70 px-4 text-sm tracking-[0.2em] uppercase placeholder:tracking-normal placeholder:normal-case focus:outline-moss"
+              class="min-w-0 flex-1 rounded-full border-3 border-ink bg-paper px-4 font-display text-base font-semibold tracking-[0.25em] uppercase shadow-sm placeholder:font-sans placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:normal-case focus:bg-banana-soft focus:outline-none"
               size="8"
               maxlength="4"
               pattern="[A-Fa-f0-9]{4}"
@@ -164,7 +206,7 @@ async function submit(): Promise<void> {
               required
             />
             <button type="submit" class="btn-ghost" :disabled="disabled || code.length !== 4">
-              Rejoindre <ArrowRight :size="16" />
+              Rejoindre <ArrowRight :size="16" :stroke-width="2.6" />
             </button>
           </form>
         </article>
@@ -173,18 +215,25 @@ async function submit(): Promise<void> {
 
     <ModalDialog v-if="intent" :title="titles[intent]" @close="intent = null">
       <form class="space-y-4" @submit.prevent="submit">
-        <label class="block text-sm font-medium" for="player-name">Votre pseudo</label>
+        <label class="block font-display font-semibold" for="player-name">Votre pseudo</label>
         <input
           id="player-name"
           v-model="name"
-          class="w-full rounded-2xl border border-surface bg-surface/80 px-4 py-3 focus:outline-moss"
+          class="w-full rounded-2xl border-3 border-ink bg-paper px-4 py-3 text-base font-medium shadow-sm focus:bg-banana-soft focus:outline-none"
           :maxlength="NAME_MAX_LENGTH"
           autocomplete="nickname"
           required
         />
-        <p v-if="store.error" class="text-sm text-heart" role="alert">{{ store.error }}</p>
+        <p
+          v-if="store.error"
+          class="rounded-xl border-2 border-ink bg-coral/40 px-3 py-2 text-sm font-medium"
+          role="alert"
+        >
+          {{ store.error }}
+        </p>
         <button type="submit" class="btn-primary w-full" :disabled="disabled || !name.trim()">
-          {{ intent === 'join' ? 'Prendre place' : 'C’est parti' }} <ArrowRight :size="17" />
+          {{ intent === 'join' ? 'Prendre place' : 'C’est parti' }}
+          <ArrowRight :size="18" :stroke-width="2.6" />
         </button>
       </form>
     </ModalDialog>

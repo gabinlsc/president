@@ -21,11 +21,7 @@ const drops = Array.from({ length: 36 }, (_, i) => ({
   drift: ((i * 17) % 120) - 60,
   size: 0.9 + ((i * 11) % 10) / 10,
 }));
-const PODIUM = [
-  'border-gold/60 bg-gold/15',
-  'border-ink-soft/40 bg-surface/70',
-  'border-[#b07a4f]/50 bg-[#b07a4f]/10',
-] as const;
+const PODIUM = ['bg-banana', 'bg-sky', 'bg-peach'] as const;
 </script>
 
 <template>
@@ -34,7 +30,8 @@ const PODIUM = [
       <span
         v-for="(d, i) in drops"
         :key="i"
-        :class="d.suit === '♥' || d.suit === '♦' ? 'text-heart/50' : 'text-champagne/40'"
+        class="font-display [-webkit-text-stroke:1.5px_var(--color-ink)] [paint-order:stroke]"
+        :class="d.suit === '♥' || d.suit === '♦' ? 'text-coral' : 'text-lilac'"
         :style="{
           left: `${d.left}%`,
           fontSize: `${d.size}rem`,
@@ -47,54 +44,60 @@ const PODIUM = [
       >
     </div>
     <section
-      class="glass-strong relative z-10 mx-auto max-w-xl rounded-[2rem] p-6 text-center sm:p-10"
+      class="panel-lg relative z-10 mx-auto max-w-xl rounded-[2rem] p-6 text-center sm:p-10"
       data-testid="results"
     >
       <span
-        class="crown-pop mx-auto grid size-20 place-items-center rounded-full bg-gradient-to-b from-champagne to-gold text-[#1d1608] shadow-[0_18px_40px_-14px_var(--color-gold)]"
-        ><Crown :size="38"
+        class="crown-pop mx-auto grid size-20 place-items-center rounded-full border-4 border-ink bg-banana shadow-md"
+        ><Crown :size="38" :stroke-width="2.2"
       /></span>
-      <p class="eyebrow mt-4">Manche {{ game.round }} terminée</p>
-      <h2 class="mt-2 font-display text-3xl">
-        <template v-if="iWon">Vous, <em class="text-gold">à vous la présidence.</em></template>
+      <p class="pill mt-5 bg-mint">Manche {{ game.round }} terminée</p>
+      <h2 class="mt-3 font-display text-3xl font-bold">
+        <template v-if="iWon">Vous, <span class="hl">à vous la présidence.</span></template>
         <template v-else
-          >{{ standings[0]?.name }}, <em class="text-gold">à vous la présidence.</em></template
+          >{{ standings[0]?.name }}, <span class="hl">à vous la présidence.</span></template
         >
       </h2>
       <TransitionGroup name="fade" tag="ol" appear class="mt-6 space-y-2 text-left">
         <li
           v-for="(seat, i) in standings"
           :key="seat.id"
-          class="flex items-center gap-3 rounded-2xl border px-4 py-3"
-          :class="PODIUM[i] ?? 'border-transparent bg-surface/50'"
+          class="flex items-center gap-3 rounded-2xl border-3 border-ink px-4 py-3 shadow-sm"
+          :class="PODIUM[i] ?? 'bg-paper'"
           :style="{ transitionDelay: `${i * 90}ms` }"
           data-testid="standing"
         >
-          <span class="w-6 font-mono text-sm text-ink-soft">{{
+          <span class="w-6 font-display text-sm font-bold">{{
             String(i + 1).padStart(2, '0')
           }}</span>
-          <strong class="flex-1">
+          <strong class="flex-1 font-display">
             {{ seat.name }}
-            <small v-if="seat.id === store.selfId" class="font-normal text-ink-soft">vous</small>
+            <small v-if="seat.id === store.selfId" class="font-sans font-medium text-ink-soft"
+              >vous</small
+            >
           </strong>
-          <span class="text-sm text-ink-soft">{{ roleLabel(seat.role) }}</span>
-          <span
-            v-if="seat.penalized"
-            class="rounded-full bg-heart/10 px-2 py-0.5 text-xs text-heart"
-            >fini sur un 2</span
-          >
+          <span class="text-sm font-medium">{{ roleLabel(seat.role) }}</span>
+          <span v-if="seat.penalized" class="pill bg-coral">fini sur un 2</span>
         </li>
       </TransitionGroup>
       <button
         v-if="store.isHost"
         type="button"
-        class="btn-gold mt-8"
+        class="btn-primary mt-8"
         :disabled="store.pending || !store.connected"
         @click="store.nextRound()"
       >
         La revanche ? <RefreshCw :size="16" />
       </button>
-      <p v-else class="mt-8 text-sm text-ink-soft">L’hôte peut lancer la prochaine manche.</p>
+      <p v-else class="mt-8 text-sm font-medium text-ink-soft">
+        L’hôte peut lancer la prochaine manche.
+      </p>
     </section>
   </div>
 </template>
+
+<style scoped>
+.hl {
+  background: linear-gradient(transparent 58%, var(--color-banana) 58% 92%, transparent 92%);
+}
+</style>

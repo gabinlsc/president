@@ -8,6 +8,8 @@
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "@fontsource/fredoka": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
     "@lucide/vue": "^1.54.0",
     "@president/shared": "*",
     "pinia": "^3.0.4",

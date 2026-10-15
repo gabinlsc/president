@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { ArrowLeft, BookOpen, Check, Crown, LogOut, Moon, Sun, WifiOff } from '@lucide/vue';
-import { theme, toggleTheme } from './lib/theme';
+import { ArrowLeft, BookOpen, Check, Crown, Gamepad2, LogOut, WifiOff } from '@lucide/vue';
 import { useGameStore } from './stores/game';
 import GameTable from './components/GameTable.vue';
 import HomeView from './components/HomeView.vue';
@@ -32,38 +31,34 @@ async function leave(): Promise<void> {
     >
       <button
         type="button"
-        class="flex items-center gap-2 font-display text-lg"
+        class="group flex items-center gap-2.5 font-display text-xl font-bold"
         aria-label="Le Président, accueil"
         @click="store.snapshot ? (confirmLeave = true) : undefined"
       >
-        <span class="glass grid size-9 place-items-center rounded-xl text-gold"
-          ><Crown :size="18"
+        <span
+          class="grid size-10 -rotate-6 place-items-center rounded-xl border-3 border-ink bg-banana shadow-sm transition-transform duration-200 ease-(--ease-spring) group-hover:rotate-6"
+          ><Crown :size="20" :stroke-width="2.5"
         /></span>
-        le président<span class="text-moss">.</span>
+        <span class="hidden sm:inline">Le Président</span>
       </button>
       <nav class="flex items-center gap-2 text-sm" aria-label="Navigation principale">
-        <button
-          type="button"
+        <a
+          href="https://games.glsc.fr"
           class="btn-ghost min-h-9 px-3"
-          :aria-label="theme === 'dark' ? 'Passer au thème clair' : 'Passer au thème sombre'"
-          data-testid="theme-toggle"
-          @click="toggleTheme"
+          aria-label="Retour à la salle de jeux"
         >
-          <Transition name="fade" mode="out-in">
-            <Sun v-if="theme === 'dark'" key="sun" :size="15" />
-            <Moon v-else key="moon" :size="15" />
-          </Transition>
-        </button>
+          <Gamepad2 :size="16" /> <span class="hidden sm:inline">Salle de jeux</span>
+        </a>
         <button type="button" class="btn-ghost min-h-9 px-3" @click="showRules = true">
-          <BookOpen :size="15" /> Les règles
+          <BookOpen :size="16" /> Les règles
         </button>
         <span
-          class="glass hidden items-center gap-2 rounded-full px-3 py-2 text-xs text-ink-soft sm:flex"
+          class="panel hidden items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold sm:flex"
           role="status"
         >
           <span
-            class="size-2 rounded-full"
-            :class="store.connected ? 'bg-moss' : 'animate-pulse bg-gold'"
+            class="size-2.5 rounded-full border-2 border-ink"
+            :class="store.connected ? 'bg-mint' : 'animate-pulse bg-banana'"
           />
           {{ store.connected ? 'Connecté' : 'Connexion…' }}
         </span>
@@ -75,12 +70,12 @@ async function leave(): Promise<void> {
       <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
-          class="flex items-center gap-1 text-sm text-ink-soft hover:text-ink"
+          class="flex items-center gap-1 font-display text-sm font-semibold text-ink-soft underline-offset-4 hover:text-ink hover:underline"
           @click="confirmLeave = true"
         >
           <ArrowLeft :size="15" /> Quitter la table
         </button>
-        <span class="eyebrow">{{
+        <span class="pill bg-paper shadow-sm">{{
           store.snapshot?.mode === 'solo' ? 'Table solo' : `Table ${store.snapshot?.code}`
         }}</span>
       </div>
@@ -91,8 +86,13 @@ async function leave(): Promise<void> {
       </Transition>
     </main>
 
-    <footer class="mx-auto w-full max-w-7xl px-4 py-6 text-xs text-ink-soft sm:px-6">
-      Fait pour les bonnes compagnies · ♣ ♦ ♠ ♥
+    <footer
+      class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-6 text-xs font-medium text-ink-soft sm:px-6"
+    >
+      <span>Fait pour les bonnes compagnies · ♣ ♦ ♠ ♥</span>
+      <a href="https://glsc.fr" class="underline underline-offset-4 hover:text-ink"
+        >Un jeu de glsc.fr</a
+      >
     </footer>
 
     <RulesDialog v-if="showRules" @close="showRules = false" />
@@ -106,7 +106,7 @@ async function leave(): Promise<void> {
       </p>
       <div class="mt-6 flex justify-end gap-2">
         <button type="button" class="btn-ghost" @click="confirmLeave = false">Rester</button>
-        <button type="button" class="btn-primary" :disabled="store.pending" @click="leave">
+        <button type="button" class="btn-danger" :disabled="store.pending" @click="leave">
           <LogOut :size="16" /> Quitter
         </button>
       </div>
@@ -118,7 +118,7 @@ async function leave(): Promise<void> {
       <Transition name="fade">
         <div
           v-if="!store.connected && store.snapshot"
-          class="glass-strong flex items-center gap-2 rounded-full px-4 py-2 text-sm"
+          class="panel flex items-center gap-2 rounded-full bg-banana px-4 py-2 text-sm font-semibold"
           role="status"
         >
           <WifiOff :size="16" /> Connexion interrompue. Retour à la table…
@@ -127,16 +127,19 @@ async function leave(): Promise<void> {
       <Transition name="fade">
         <div
           v-if="store.notice"
-          class="glass-strong flex items-center gap-2 rounded-full px-4 py-2 text-sm"
+          class="panel flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
           role="status"
         >
-          <Check :size="16" class="text-moss" /> {{ store.notice }}
+          <span class="grid size-5 place-items-center rounded-full border-2 border-ink bg-mint"
+            ><Check :size="12" :stroke-width="3"
+          /></span>
+          {{ store.notice }}
         </div>
       </Transition>
       <Transition name="fade">
         <div
           v-if="store.error && view !== 'home'"
-          class="pointer-events-auto flex items-center gap-3 rounded-full bg-heart/90 px-4 py-2 text-sm text-sand shadow-lg backdrop-blur"
+          class="panel pointer-events-auto flex items-center gap-3 rounded-full bg-coral px-4 py-2 text-sm font-semibold"
           role="alert"
           data-testid="error"
         >

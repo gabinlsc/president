@@ -2,6 +2,8 @@
 import ModalDialog from './ModalDialog.vue';
 defineEmits<{ close: [] }>();
 
+const TAGS = ['bg-banana', 'bg-mint', 'bg-sky', 'bg-lilac', 'bg-peach', 'bg-coral'] as const;
+
 const rules: readonly [string, string][] = [
   ['Valeurs', '3 < 4 < … < 10 < Valet < Dame < Roi < As < 2. 52 cartes, toutes distribuées.'],
   [
@@ -37,9 +39,15 @@ const rules: readonly [string, string][] = [
 <template>
   <ModalDialog title="Les règles du Président" @close="$emit('close')">
     <dl class="space-y-3 text-sm leading-relaxed">
-      <div v-for="[term, text] in rules" :key="term" class="rounded-2xl bg-surface/60 p-3">
-        <dt class="font-semibold text-moss">{{ term }}</dt>
-        <dd class="text-ink-soft">{{ text }}</dd>
+      <div
+        v-for="([term, text], i) in rules"
+        :key="term"
+        class="rounded-2xl border-3 border-ink bg-paper p-3 shadow-sm"
+      >
+        <dt>
+          <span class="pill" :class="TAGS[i % TAGS.length]">{{ term }}</span>
+        </dt>
+        <dd class="mt-1.5 text-ink-soft">{{ text }}</dd>
       </div>
     </dl>
   </ModalDialog>

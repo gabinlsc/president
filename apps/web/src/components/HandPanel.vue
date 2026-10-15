@@ -64,7 +64,7 @@ const turnLabel = computed(() => {
 
 <template>
   <section
-    class="glass-strong relative rounded-[2rem] p-4 transition sm:p-6"
+    class="panel-lg relative rounded-[2rem] p-4 transition-colors duration-300 sm:p-6"
     :class="store.isMyTurn ? 'hand-active' : ''"
     aria-label="Votre main"
   >
@@ -73,23 +73,25 @@ const turnLabel = computed(() => {
         <span class="relative grid size-11 place-items-center">
           <span v-if="store.isMyTurn" class="turn-ring" aria-hidden="true" />
           <span
-            class="grid size-11 place-items-center rounded-full font-display text-lg"
-            :class="store.isMyTurn ? 'bg-gold text-[#1d1608]' : 'bg-moss text-on-accent'"
+            class="grid size-11 place-items-center rounded-full border-3 border-ink font-display text-lg font-bold"
+            :class="store.isMyTurn ? 'bg-banana' : 'bg-mint'"
           >
             {{ store.self?.name.slice(0, 1).toUpperCase() }}
           </span>
         </span>
         <span>
-          <strong data-testid="self-name">{{ store.self?.name }}</strong>
-          <span class="ml-1 text-xs text-ink-soft">vous</span>
+          <strong class="font-display text-lg" data-testid="self-name">{{
+            store.self?.name
+          }}</strong>
+          <span class="pill ml-1.5 bg-sky py-0 text-[0.65rem]">vous</span>
           <span class="block text-xs text-ink-soft">{{
             store.self ? roleLabel(store.self.role) : ''
           }}</span>
         </span>
       </div>
       <span
-        class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
-        :class="store.isMyTurn ? 'bg-gold text-[#1d1608] shadow-lg' : 'bg-surface/60 text-ink-soft'"
+        class="pill px-3.5 py-1 text-sm transition"
+        :class="store.isMyTurn ? 'bg-mint shadow-sm' : 'bg-paper text-ink-soft'"
         data-testid="turn"
         :data-mine="store.isMyTurn"
         >{{ turnLabel }}</span
@@ -99,7 +101,7 @@ const turnLabel = computed(() => {
     <Transition name="fade">
       <p
         v-if="store.isMyTurn"
-        class="mx-auto mt-3 w-fit rounded-full bg-gradient-to-b from-champagne to-gold px-6 py-1.5 text-center font-display text-base text-[#1d1608] shadow-lg"
+        class="mx-auto mt-3 w-fit -rotate-2 rounded-2xl border-3 border-ink bg-banana px-6 py-1.5 text-center font-display text-lg font-bold shadow-md"
         role="status"
       >
         À vous de jouer
@@ -126,7 +128,7 @@ const turnLabel = computed(() => {
             :playable="game.phase !== 'playing' || playable.has(card.id)"
             :class="[
               'deal-in',
-              reserved.has(card.id) ? 'ring-2 ring-gold ring-offset-2 ring-offset-transparent' : '',
+              reserved.has(card.id) ? 'rounded-xl outline-3 outline-offset-2 outline-coral' : '',
             ]"
             @select="store.toggle(card.id)"
           />
@@ -135,12 +137,16 @@ const turnLabel = computed(() => {
     </div>
 
     <footer class="mt-3 flex flex-wrap items-center justify-between gap-3">
-      <p class="min-w-0 flex-1 text-sm text-ink-soft" data-testid="hint" aria-live="polite">
+      <p
+        class="min-w-0 flex-1 text-sm font-medium text-ink-soft"
+        data-testid="hint"
+        aria-live="polite"
+      >
         {{ hint }}
         <button
           v-if="store.selected.length"
           type="button"
-          class="ml-2 text-xs font-semibold text-gold underline-offset-2 hover:underline"
+          class="ml-2 text-xs font-bold text-ink underline underline-offset-2 hover:text-heart"
           @click="store.selected = []"
         >
           Effacer
@@ -150,11 +156,7 @@ const turnLabel = computed(() => {
         <button
           v-if="game.phase === 'playing' && store.self?.status !== 'finished'"
           type="button"
-          :class="
-            store.availableCut
-              ? 'btn-gold cut-ready'
-              : 'btn border border-ink/10 bg-ink/5 text-ink-soft'
-          "
+          :class="store.availableCut ? 'btn-danger cut-ready' : 'btn'"
           title="S’active dès que vous pouvez fermer un carré, à votre tour ou hors tour."
           :disabled="!store.availableCut || store.pending || !store.connected"
           data-testid="cut"
@@ -166,7 +168,7 @@ const turnLabel = computed(() => {
           <button
             v-if="game.exchange && !game.exchange.forced && !game.exchange.submitted"
             type="button"
-            class="btn-primary"
+            class="btn-go"
             :disabled="!store.canExchange || store.pending || !store.connected"
             @click="store.exchange()"
           >
@@ -184,7 +186,7 @@ const turnLabel = computed(() => {
           </button>
           <button
             type="button"
-            class="btn-primary"
+            class="btn-go"
             :disabled="!store.canPlay || store.pending || !store.connected"
             @click="store.play()"
           >
