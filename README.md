@@ -50,6 +50,8 @@ compilé sur le port 3001. Définissez `CLIENT_ORIGIN` avec l'origine publique e
 (par exemple `https://president.example`) et configurez votre proxy pour transmettre
 les WebSockets. `PORT` change le port ; `STATIC_DIR` change le répertoire du frontend.
 `VITE_SERVER_URL` est facultatif et permet un serveur séparé (défini lors du build).
+`RESULTS_FILE` (facultatif) : fichier où le serveur ajoute une ligne JSON par manche terminée
+(rôles et places des joueurs encore présents), utilisée pour le classement de games.glsc.fr.
 
 Rythme de jeu, en millisecondes : `BOT_DELAY` (réflexion des bots, 900 par défaut),
 `DEAL_DELAY` (animation de la donne, 1600), `CLEAR_PAUSE` (pause après un pli nettoyé, 1100).
