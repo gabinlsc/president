@@ -10,6 +10,7 @@ const MIME_TYPES: Readonly<Record<string, string>> = {
   '.png': 'image/png',
   '.ico': 'image/x-icon',
   '.woff2': 'font/woff2',
+  '.webmanifest': 'application/manifest+json',
 };
 
 async function serveStatic(

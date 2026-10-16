@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { ArrowRight, Bot, Minus, Plus, Users } from '@lucide/vue';
 import { MAX_SOLO_BOTS, MIN_SOLO_BOTS, NAME_MAX_LENGTH, type Card } from '@president/shared';
 import { useGameStore } from '../stores/game';
 import { storage } from '../lib/storage';
+import { installState, onInstallChange, promptInstall } from '../lib/pwa';
 import ModalDialog from './ModalDialog.vue';
 import PlayingCard from './PlayingCard.vue';
 import DecorShapes from './DecorShapes.vue';
@@ -13,6 +14,15 @@ const bots = ref(MIN_SOLO_BOTS);
 const code = ref('');
 const name = ref(storage.name());
 const intent = ref<'solo' | 'online' | 'join' | null>(null);
+
+const install = ref(installState());
+const iosHint = ref(false);
+const stopInstall = onInstallChange(() => (install.value = installState()));
+onBeforeUnmount(stopInstall);
+function installApp() {
+  if (install.value.canPrompt) void promptInstall();
+  else iosHint.value = !iosHint.value;
+}
 
 const showcase: Card[] = [
   { id: '14-clubs', rank: 14, suit: 'clubs' },
@@ -237,5 +247,12 @@ async function submit(): Promise<void> {
         </button>
       </form>
     </ModalDialog>
+
+    <p v-if="install.canPrompt || install.ios" class="mt-6 text-center">
+      <button type="button" class="btn-ghost" @click="installApp">Installer l’appli</button>
+      <span v-if="iosHint && install.ios" role="status" class="mt-2 block text-sm font-medium">
+        Touche « Partager » puis « Sur l’écran d’accueil ».
+      </span>
+    </p>
   </main>
 </template>
