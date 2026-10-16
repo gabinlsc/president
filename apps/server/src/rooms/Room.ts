@@ -3,6 +3,8 @@ import type { GameEvent, GameState, PlayerId, RoomMode } from '@president/shared
 export interface Member {
   readonly id: PlayerId;
   readonly name: string;
+  /** Profile id (games.glsc.fr/profil) of a signed-in human. */
+  readonly pid?: string;
   isBot: boolean;
   connected: boolean;
   socketId: string | null;

@@ -1,5 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { resolve } from 'node:path';
+import { createIdentify, type Identify } from './profiles';
 import { fileResultSink, type ResultSink } from './results';
 
 export interface Pacing {
@@ -21,6 +22,8 @@ export interface ServerOptions {
   readonly roomTtl: number;
   /** Receives every finished round (leaderboard of games.glsc.fr); from RESULTS_FILE. */
   readonly results: ResultSink | null;
+  /** Who is behind a connection (games.glsc.fr profiles), from PROFILES_URL. Default: everyone is a guest. */
+  readonly identify: Identify;
 }
 
 const DEFAULT_ORIGINS =
@@ -46,6 +49,7 @@ export function resolveOptions(overrides: Partial<ServerOptions> = {}): ServerOp
     seed: () => randomInt(0, 2 ** 32),
     roomTtl: 30 * 60 * 1000,
     results: env.RESULTS_FILE ? fileResultSink(resolve(env.RESULTS_FILE)) : null,
+    identify: createIdentify(env.PROFILES_URL?.trim() || undefined),
     ...overrides,
   };
 }

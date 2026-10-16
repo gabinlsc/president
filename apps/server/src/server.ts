@@ -17,7 +17,7 @@ export function createAppServer(overrides: Partial<ServerOptions> = {}) {
   const rooms = new RoomService(options, (socketId, snapshot) =>
     io.to(socketId).emit('room:state', snapshot),
   );
-  bindTransport(io, rooms);
+  bindTransport(io, rooms, options.identify);
   const sweep = setInterval(() => rooms.cleanup(), 60_000);
   sweep.unref();
   return {

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { ArrowRight, Bot, Minus, Plus, Users } from '@lucide/vue';
 import { MAX_SOLO_BOTS, MIN_SOLO_BOTS, NAME_MAX_LENGTH, type Card } from '@president/shared';
 import { useGameStore } from '../stores/game';
 import { storage } from '../lib/storage';
 import { installState, onInstallChange, promptInstall } from '../lib/pwa';
+import { fetchProfile, PROFILE_PAGE, type Profile } from '../lib/profile';
 import ModalDialog from './ModalDialog.vue';
 import PlayingCard from './PlayingCard.vue';
 import DecorShapes from './DecorShapes.vue';
@@ -14,6 +15,14 @@ const bots = ref(MIN_SOLO_BOTS);
 const code = ref('');
 const name = ref(storage.name());
 const intent = ref<'solo' | 'online' | 'join' | null>(null);
+
+const profile = ref<Profile | null>(null);
+onMounted(async () => {
+  const found = await fetchProfile();
+  if (!found) return;
+  profile.value = found;
+  name.value = found.name;
+});
 
 const install = ref(installState());
 const iosHint = ref(false);
@@ -232,8 +241,17 @@ async function submit(): Promise<void> {
           class="w-full rounded-2xl border-3 border-ink bg-paper px-4 py-3 text-base font-medium shadow-sm focus:bg-banana-soft focus:outline-none"
           :maxlength="NAME_MAX_LENGTH"
           autocomplete="nickname"
+          :readonly="profile !== null"
           required
         />
+        <p class="text-sm font-medium">
+          <template v-if="profile">
+            Profil connecté ✓ · <a class="underline" :href="PROFILE_PAGE">Mon profil</a>
+          </template>
+          <template v-else>
+            Pseudo libre · <a class="underline" :href="PROFILE_PAGE">Réserver mon pseudo</a>
+          </template>
+        </p>
         <p
           v-if="store.error"
           class="rounded-xl border-2 border-ink bg-coral/40 px-3 py-2 text-sm font-medium"
