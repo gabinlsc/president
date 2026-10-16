@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "Le Président · GLSC",
+  "short_name": "Président",
+  "description": "Le Président : une table, des amis et un jeu de cartes. Jouez en ligne ou contre les bots.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fffdf0",
+  "theme_color": "#fffdf0",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

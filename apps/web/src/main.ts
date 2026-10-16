@@ -9,7 +9,9 @@ import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/500.css';
 import '@fontsource/space-grotesk/700.css';
 import './style.css';
+import { setupPwa } from './lib/pwa';
 
+setupPwa(import.meta.env.PROD);
 const app = createApp(App).use(createPinia());
 useGameStore().connect();
 app.mount('#app');
