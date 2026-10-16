@@ -9,7 +9,8 @@ let previousFocus: HTMLElement | null = null;
 
 const focusable = () =>
   Array.from(
-    panel.value?.querySelectorAll<HTMLElement>('button:not(:disabled), input, a[href]') ?? [],
+    panel.value?.querySelectorAll<HTMLElement>('button:not(:disabled), input, textarea, a[href]') ??
+      [],
   );
 
 function keydown(event: KeyboardEvent): void {
@@ -31,7 +32,7 @@ onMounted(async () => {
   previousFocus = document.activeElement as HTMLElement | null;
   document.addEventListener('keydown', keydown);
   await nextTick();
-  (panel.value?.querySelector<HTMLElement>('input') ?? focusable()[0])?.focus();
+  (panel.value?.querySelector<HTMLElement>('input, textarea') ?? focusable()[0])?.focus();
 });
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', keydown);
