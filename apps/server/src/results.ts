@@ -4,6 +4,8 @@ import type { Role, RoomMode } from '@president/shared';
 /** One player at the end of a round, best place first. Humans who were away at the end are not listed. */
 export interface ResultPlayer {
   readonly name: string;
+  /** Profile id of a signed-in human (the leaderboard groups results by profile). */
+  readonly pid?: string;
   readonly bot: boolean;
   /** 1 = président, then each place down to the trou du cul. */
   readonly rank: number;

@@ -160,13 +160,13 @@ describe('Classement : une ligne par manche terminée', () => {
   });
 
   /** Solo à 5 : l'humain a un as seul et finit premier, les bots finissent la manche. */
-  function nearEnd(onRecord: (r: RoundRecord) => void) {
+  function nearEnd(onRecord: (r: RoundRecord) => void, pid?: string) {
     let seed = 1;
     const rooms = new RoomService(
       resolveOptions({ pacing: PACING, seed: () => seed++, results: onRecord }),
       () => {},
     );
-    const session = rooms.create({ name: 'Moi', mode: 'solo', bots: 4 }, 's0');
+    const session = rooms.create({ name: 'Moi', mode: 'solo', bots: 4 }, 's0', pid);
     const room = rooms.store.get(session.code)!;
     const ids = [...room.members.keys()];
     const crafted = playing([[card(14)], [card(3)], [card(4), card(5)], [card(6)], [card(7)]]);
@@ -177,6 +177,17 @@ describe('Classement : une ligne par manche terminée', () => {
     };
     return { rooms, room, human: room.members.get(ids[0]!)! };
   }
+
+  it('rattache la manche au profil du joueur connecté, et à lui seul', () => {
+    const records: RoundRecord[] = [];
+    const { rooms, room, human } = nearEnd((r) => records.push(r), '0123456789abcdef');
+    rooms.play(room, human, ['14-clubs']);
+    for (let i = 0; i < 200 && room.game.phase !== 'roundOver'; i++) vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(10_000);
+    expect(records[0]!.players.filter((p) => p.pid)).toEqual([
+      expect.objectContaining({ name: 'Moi', pid: '0123456789abcdef', bot: false }),
+    ]);
+  });
 
   it('enregistre le classement avec les rôles, une seule fois', () => {
     const records: RoundRecord[] = [];

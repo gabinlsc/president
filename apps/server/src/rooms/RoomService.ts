@@ -40,10 +40,10 @@ export class RoomService {
     private readonly publish: Publish,
   ) {}
 
-  create(input: CreateRoomInput, socketId: string): Session {
+  create(input: CreateRoomInput, socketId: string, pid?: string): Session {
     if (this.store.size >= MAX_ROOMS)
       throw new RoomError('Le serveur est complet. Réessayez plus tard.');
-    const human = this.human(input.name, socketId);
+    const human = this.human(input.name, socketId, pid);
     const room: Room = {
       code: this.freeCode(),
       mode: input.mode,
@@ -75,11 +75,11 @@ export class RoomService {
     return this.session(room, human);
   }
 
-  join(input: JoinRoomInput, socketId: string): Session {
+  join(input: JoinRoomInput, socketId: string, pid?: string): Session {
     const room = this.store.get(input.code);
     if (!room || room.mode !== 'online') throw new RoomError('Ce salon est introuvable.');
     if (room.game.phase !== 'lobby') throw new RoomError('Cette partie a déjà commencé.');
-    const human = this.human(input.name, socketId);
+    const human = this.human(input.name, socketId, pid);
     this.apply(room, { type: 'seat', playerId: human.id, name: human.name });
     room.members.set(human.id, human);
     this.store.index(room, human);
@@ -188,10 +188,11 @@ export class RoomService {
     };
   }
 
-  private human(name: string, socketId: string): Member {
+  private human(name: string, socketId: string, pid?: string): Member {
     return {
       id: randomUUID(),
       name,
+      ...(pid ? { pid } : {}),
       isBot: false,
       connected: true,
       socketId,
@@ -261,6 +262,7 @@ export class RoomService {
       return [
         {
           name: member.name,
+          ...(member.pid ? { pid: member.pid } : {}),
           bot: member.isBot,
           rank: i + 1,
           won: i === 0,
