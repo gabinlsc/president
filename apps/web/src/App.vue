@@ -6,6 +6,7 @@ import GameTable from './components/GameTable.vue';
 import HomeView from './components/HomeView.vue';
 import LobbyView from './components/LobbyView.vue';
 import ModalDialog from './components/ModalDialog.vue';
+import ReportButton from './components/ReportButton.vue';
 import ResultsPanel from './components/ResultsPanel.vue';
 import RulesDialog from './components/RulesDialog.vue';
 
@@ -95,6 +96,7 @@ async function leave(): Promise<void> {
       >
     </footer>
 
+    <ReportButton game="president" :room="store.snapshot?.code" :phase="view" />
     <RulesDialog v-if="showRules" @close="showRules = false" />
     <ModalDialog v-if="confirmLeave" title="Quitter la table ?" @close="confirmLeave = false">
       <p class="text-sm text-ink-soft">
